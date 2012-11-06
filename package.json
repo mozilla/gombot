@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "hapi": "0.8.3"
+    "hapi": "0.8.3",
+    "walkdir": "0.0.5"
   },
   "optionalDependencies": {
   },

@@ -1,11 +1,21 @@
 #!/usr/bin/env node
 
 // This is the gombot API server!
+var     Hapi = require('hapi'),
+   apiLoader = require('../lib/api_loader.js');
 
-var Hapi = require('hapi');
+function fatal(msg) {
+  process.stderr.write("fatal error: " + msg + "\n");
+  process.exit(1);
+}
 
 // Create a server with a host and port
 var server = new Hapi.Server('localhost', process.env.PORT || 8080);
 
-// Start the server
-server.start();
+// now load up api handlers
+apiLoader(server, function(err) {
+  if (err) fatal(err);
+
+  // Start the server
+  server.start();
+});
