@@ -74,7 +74,9 @@ describe('GumbotCrypto.sign', function() {
         nonce: "one time only please"
       }, function(err, rez) {
         should.not.exist(err);
-        ("Zt21WXS7nkwIUdocxbzMBsXKv+0NREsxQ7aBHA9MS4w=").should.equal(rez);
+        should.exist(rez);
+        (rez.Authorization).should.be.a('string');
+        (rez.Authorization).should.equal('MAC id="bar", ts="1352177818", nonce="one time only please", mac="Zt21WXS7nkwIUdocxbzMBsXKv+0NREsxQ7aBHA9MS4w="');
         done();
       });
     });

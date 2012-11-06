@@ -146,8 +146,20 @@ var GombotCrypto = (function() {
           // payload
           args.payload + '\n';
 
-        var bits = hmac.mac(body);
-        cb(null, sjcl.codec.base64.fromBits(bits));
+        var mac = sjcl.codec.base64.fromBits(hmac.mac(body));
+
+        // now formulate the authorization header.
+        var val =
+          'MAC id="' + args.email + '", ' +
+          'ts="' + args.date + '", ' +
+          'nonce="' + args.nonce + '", ' +          
+          'mac="' + mac + '"';
+
+        var headers = { "Authorization": val };
+
+        // and pass a bag of calculated authorization headers (only one)
+        // back to the client
+        cb(null, headers);
       }, 0);
     }
   };
