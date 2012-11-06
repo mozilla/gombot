@@ -20,9 +20,7 @@ describe("/api/v1/context", function() {
   it ("should return an object with two keys", function(done) {
     client.context({
       host: servers.host,
-      port: servers.port,
-      method: 'get',
-      path: '/api/v1/context'
+      port: servers.port
     }, function(err, r) {
       should.not.exist(err);
       should.exist(r);
