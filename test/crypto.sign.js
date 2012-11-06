@@ -12,12 +12,51 @@ describe('GumbotCrypto.sign', function() {
     }).should.throw('.email is required and must be a string');
     (function(){
       GombotCrypto.sign({ key: "foo", email: "bar" });
-    }).should.throw('.date is required and must be a javascript Date object');
+    }).should.throw('.date is required and must be a javascript Date object or an integer representing seconds since epoch');
     (function(){
-      GombotCrypto.sign({ key: "foo", email: "bar", date: new Date() });
-    }).should.throw('.payload is required and must be a string');
+      GombotCrypto.sign({
+        key: "foo",
+        email: "bar",
+        date: new Date(),
+        payload: 45 // bogus!
+      });
+    }).should.throw('.payload must be a string if supplied');
     (function(){
-      GombotCrypto.sign({ key: "foo", email: "bar", date: new Date(), payload: 'x' });
+      GombotCrypto.sign({
+        key: "foo",
+        email: "bar",
+        date: new Date(),
+        payload: 'x' });
+    }).should.throw('.url is required and must be a string');
+    (function(){
+      GombotCrypto.sign({
+        key: "foo",
+        email: "bar",
+        date: new Date(),
+        payload: 'x',
+        url: "https://api.gombot.org/v1/foo"
+      });
+    }).should.throw('.method must be an allowable HTTP method');
+    (function(){
+      GombotCrypto.sign({
+        key: "foo",
+        email: "bar",
+        date: new Date(),
+        payload: 'x',
+        url: "https://api.gombot.org/v1/foo",
+        method: 'get'
+      });
+    }).should.throw('.nonce should be a random string');
+    (function(){
+      GombotCrypto.sign({
+        key: "foo",
+        email: "bar",
+        date: new Date(),
+        payload: 'x',
+        url: "https://api.gombot.org/v1/foo",
+        method: 'get',
+        nonce: "one time only please"
+      });
     }).should.throw('missing required callback argument');
     done();
   });
@@ -29,10 +68,13 @@ describe('GumbotCrypto.sign', function() {
         key: rez.cryptKey,
         email: "bar",
         date: new Date(1352177818454),
-        payload: 'x'
+        payload: 'x',
+        url: "https://api.gombot.org:10/v1/foo",
+        method: 'get',
+        nonce: "one time only please"
       }, function(err, rez) {
         should.not.exist(err);
-        ("DqKJit053JFYNgueXwOZ1xKO83l2zjDUVctL9koj/G4=").should.equal(rez);
+        ("Zt21WXS7nkwIUdocxbzMBsXKv+0NREsxQ7aBHA9MS4w=").should.equal(rez);
         done();
       });
     });
