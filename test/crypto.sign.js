@@ -22,7 +22,7 @@ describe('GumbotCrypto.sign', function() {
     done();
   });
 
-  it('should deterministically sign when arguments are correct', function(done) {
+  it('should deterministically sign with constant arguments', function(done) {
     GombotCrypto.derive({ email: 'foo', password: 'bar' }, function(err, rez) {
       should.not.exist(err);
       GombotCrypto.sign({
