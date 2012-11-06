@@ -10,12 +10,12 @@ var GombotCrypto = (function() {
 
   // salt string for derivation of keyAuth
   var AUTH_SALT_STRING = "identity.mozilla.com/gombot/v1/authentication";
-  
+
   // salt string for derivation of keyCrypt
   var CRYPT_SALT_STRING = "identity.mozilla.com/gombot/v1/encryption";
 
   // methods supported for request signing
-  var SUPPORTED_METHODS = { 
+  var SUPPORTED_METHODS = {
     GET: true,
     POST: true,
     PUT: true,
@@ -35,7 +35,7 @@ var GombotCrypto = (function() {
       setTimeout(cb, 0);
     },
     derive: function(args, cb) {
-      args = args || {}; 
+      args = args || {};
 
       if (typeof args.email !== 'string' || typeof args.password !== 'string')
         throw new Error("missing required parameters");
@@ -98,9 +98,9 @@ var GombotCrypto = (function() {
 
       if (typeof args.key !== 'string')
         throw new Error(".key is required and must be a string");
-      if (typeof args.email !== 'string')      
+      if (typeof args.email !== 'string')
         throw new Error(".email is required and must be a string");
-      if (typeof args.date !== 'number')      
+      if (typeof args.date !== 'number')
         throw new Error(".date is required and must be a javascript Date object or an integer representing seconds since epoch");
       if (typeof args.payload !== 'string')
         throw new Error(".payload must be a string if supplied");
@@ -125,7 +125,7 @@ var GombotCrypto = (function() {
       if (!args.url.port) {
         args.url.port = (args.url.scheme === 'https' ? '443' : '80');
       }
-      
+
       setTimeout(function() {
         // see https://tools.ietf.org/html/draft-ietf-oauth-v2-http-mac-01
         // for normalization procedure
@@ -152,7 +152,7 @@ var GombotCrypto = (function() {
         var val =
           'MAC id="' + args.email + '", ' +
           'ts="' + args.date + '", ' +
-          'nonce="' + args.nonce + '", ' +          
+          'nonce="' + args.nonce + '", ' +
           'mac="' + mac + '"';
 
         var headers = { "Authorization": val };
