@@ -7,5 +7,8 @@ notifications:
   email:
     - lloyd@mozilla.com
     - zcarter@mozilla.com
-    - psawaya@mozilla.com
-    - warner@mozilla.com
+  irc:
+    channels:
+      - "irc.mozilla.org#identity"
+    use_notice: false
+    skip_join: false
