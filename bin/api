@@ -9,8 +9,13 @@ function fatal(msg) {
   process.exit(1);
 }
 
+var options = {
+  name: "Gombot Server",
+  docs: true
+};
+
 // Create a server with a host and port
-var server = new Hapi.Server('127.0.0.1', (process.env.PORT ? parseInt(process.env.PORT) : 8080));
+var server = new Hapi.Server('127.0.0.1', (process.env.PORT ? parseInt(process.env.PORT) : 8080), options);
 
 server.on('bound', function(host, port) {
   process.stdout.write('bound to ' + host + ':' + port + "\n");
