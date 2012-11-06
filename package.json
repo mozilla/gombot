@@ -1,0 +1,18 @@
+{
+  "name": "gombot",
+  "description": "A password manager for the rest of us, the server part.",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+  },
+  "optionalDependencies": {
+  },
+  "devDependencies": {
+    "awsbox": "*",
+    "should": "*",
+    "mocha": "*"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  }
+}
