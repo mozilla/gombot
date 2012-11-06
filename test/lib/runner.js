@@ -35,13 +35,21 @@ module.exports = function(cb) {
 
   s.server.on('exit', function (code) {
     var err = 'server exited unexpectedly with ' + code;
-    if (!s.shuttingDown && s.started) {
+    if (s.stopper) {
+      s.stopper(!code ? null : err);
+    } else if (!s.shuttingDown && s.started) {
       process.stderr.write(err + "\n");
       process.exit(1);
     } else if (!s.started) {
       cb(err);
     }
   });
+
+  s.stop = function(cb) {
+    s.shuttingDown = true;
+    s.server.kill();
+    s.stopper = cb;
+  }
 
   process.on('exit', function() {
     s.server.kill();

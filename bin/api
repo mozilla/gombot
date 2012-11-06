@@ -22,3 +22,7 @@ apiLoader(server, function(err) {
   // Start the server
   server.start();
 });
+
+process.on('SIGTERM', function() {
+  server.stop();
+});
