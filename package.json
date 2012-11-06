@@ -10,9 +10,9 @@
   "optionalDependencies": {
   },
   "devDependencies": {
-    "awsbox": "*",
-    "should": "*",
-    "mocha": "*"
+    "awsbox": "0.3.3",
+    "should": "1.2.1",
+    "mocha": "1.6.0"
   },
   "scripts": {
     "test": "mocha -R spec"
