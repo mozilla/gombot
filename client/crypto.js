@@ -58,8 +58,35 @@ var GombotCrypto = (function() {
     decrypt: function(cryptKey, cipherText, cb) {
       setTimeout(cb, 0);
     },
-    sign: function(authKey, email, date, payload, cb) {
-      setTimeout(cb, 0);
+    sign: function(args, cb) {
+      args = args || {};
+      // if date is provided as an object, let's round to seconds since
+      // epoch
+      if (typeof args.date === 'object' && args.date.getTime) {
+        args.date = Math.round(args.date.getTime() / 1000);
+      }
+
+      if (typeof args.key !== 'string')
+        throw new Error(".key is required and must be a string");
+      if (typeof args.email !== 'string')      
+        throw new Error(".email is required and must be a string");
+      if (typeof args.date !== 'number')      
+        throw new Error(".date is required and must be a javascript Date object");
+      if (typeof args.payload !== 'string')
+        throw new Error(".payload is required and must be a string");
+      if (typeof cb !== 'function')
+        throw new Error("missing required callback argument");
+
+      // how about if the key is poorly formated?
+      var keyBits = sjcl.codec.base64.toBits(args.key);
+      
+      setTimeout(function() {
+        var hmac = new sjcl.misc.hmac(keyBits);
+        var bits = hmac.mac(args.date.toString() + "\n" +
+                            args.email + "\n" + 
+                            args.payload);
+        cb(null, sjcl.codec.base64.fromBits(bits));
+      }, 0);
     }
   };
 })();
