@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "hapi": "0.8.3",
+    "hapi": "git://github.com/lloyd/hapi#b12270",
     "walkdir": "0.0.5"
   },
   "optionalDependencies": {

@@ -10,12 +10,15 @@ function fatal(msg) {
 }
 
 // Create a server with a host and port
-var server = new Hapi.Server('localhost', process.env.PORT || 8080);
+var server = new Hapi.Server('127.0.0.1', (process.env.PORT ? parseInt(process.env.PORT) : 8080));
+
+server.on('bound', function(host, port) {
+  process.stdout.write('bound to ' + host + ':' + port + "\n");
+});
 
 // now load up api handlers
 apiLoader(server, function(err) {
   if (err) fatal(err);
-
   // Start the server
   server.start();
 });

@@ -1,25 +1,49 @@
 // run servers for local testing
 
 var spawn = require('child_process').spawn,
-
+     path = require('path');
 
 module.exports = function(cb) {
-  var s = {};
+  var s = {
+    started: false,
+    shuttingDown: false
+  };
   // spawn servers
-  s.api_server = spawn(path.join(__dirname, '..', 'bin', 'api'));
-  s.api_server.stdout.on('data', function (data) {
-    console.log('stdout: ' + data);
+  s.server = spawn(path.join(__dirname, '..', '..', 'bin', 'api'), [], {
+    env: {
+      PORT: 0
+    }
+  });
+  s.server.stdout.on('data', function (data) {
+    if (!s.started) {
+      // we parse app output to determine when the process has really
+      data.toString().split("\n").forEach(function(line) {
+        var m = /^bound to ([a-zA-Z0-9_.]+):([0-9]+)$/.exec(line);
+        if (m) {
+          s.started = true;
+          s.host = m[1];
+          s.port = parseInt(m[2], 10);
+          cb(null, s);
+        }
+      });
+    }
   });
 
-  s.api_server.stderr.on('data', function (data) {
+  s.server.stderr.on('data', function (data) {
     console.log('stderr: ' + data);
   });
 
-  s.api_server.on('exit', function (code) {
-    console.log('child process exited with code ' + code);
+  s.server.on('exit', function (code) {
+    var err = 'server exited unexpectedly with ' + code;
+    if (!s.shuttingDown && s.started) {
+      process.stderr.write(err + "\n");
+      process.exit(1);
+    } else if (!s.started) {
+      cb(err);
+    }
   });
 
-  process.nextTick(function() {
-    cb(null, s);
+  process.on('exit', function() {
+    s.server.kill();
   });
 };
