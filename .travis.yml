@@ -1,0 +1,11 @@
+language: node_js
+
+node_js:
+ - 0.8
+
+notifications:
+  email:
+    - lloyd@mozilla.com
+    - zcarter@mozilla.com
+    - psawaya@mozilla.com
+    - warner@mozilla.com
