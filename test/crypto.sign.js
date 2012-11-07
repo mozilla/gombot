@@ -62,6 +62,7 @@ describe('GumbotCrypto.sign', function() {
   });
 
   it('should deterministically sign with constant arguments', function(done) {
+    this.timeout(10000);
     GombotCrypto.derive({ email: 'foo', password: 'bar' }, function(err, rez) {
       should.not.exist(err);
       GombotCrypto.sign({
