@@ -22,9 +22,6 @@ GombotClient = (function() {
       },
       error: function (data, res, status) {
         cb('Error: '+data+'\nStatus: '+status);
-      },
-      complete: function () {
-        cb('huh');
       }
     });
   }
