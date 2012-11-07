@@ -1,32 +1,32 @@
 GombotClient = (function() {
-  if (!XMLHttpRequest) var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+  var xhr = typeof jQuery !== 'undefined' ? jQuery.ajax : require('xhrequest');
 
   function request(args, cb) {
-    var req = new XMLHttpRequest();
     var url = args.scheme ? args.scheme : 'http';
+    var method = args.method.toUpperCase();
     url += "://" + args.host;
     if (args.port) url += ":" + args.port;
     url += args.path;
-    req.open(args.method.toUpperCase(), url, false);
-    var resp = {
-      headers: {},
-      body: null
-    };
-    req.onreadystatechange = function() {
-      if (req.readyState == 4) {
+
+    console.log('sending xhr');
+    xhr(url, {
+      method: method,
+      success: function (data, res, status) {
         try {
-          resp.body = JSON.parse(req.responseText);
-        } catch(e) {
-          if (cb) {
-            cb("couldn't parse JSON body: " + e);
-            cb = null;
-          }
+          var body = JSON.parse(data);
+          body.session_context = {};
+          cb(null, body);
+        } catch (e) {
+          cb('Invalid JSON response: '+e);
         }
-        cb(resp);
+      },
+      error: function (data, res, status) {
+        cb('Error: '+data+'\nStatus: '+status);
+      },
+      complete: function () {
+        cb('huh');
       }
-      // XXX: error handling!
-    }
-    req.send();
+    });
   }
 
   return {
