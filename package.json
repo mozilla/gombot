@@ -6,6 +6,7 @@
   "dependencies": {
     "hapi": "git://github.com/lloyd/hapi#b12270",
     "walkdir": "0.0.5",
+    "couchbase": "0.0.4",
     "express": "3.0.2",
     "nunjucks": "0.1.5"
   },

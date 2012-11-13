@@ -19,7 +19,7 @@ module.exports = function(cb) {
     if (!s.started) {
       // we parse app output to determine when the process has really
       data.toString().split("\n").forEach(function(line) {
-        var m = /^bound to ([a-zA-Z0-9_.]+):([0-9]+)$/.exec(line);
+        var m = /running on http:\/\/([a-zA-Z0-9_.]+):([0-9]+)$/.exec(line);
         if (m) {
           s.started = true;
           s.host = m[1];
@@ -27,6 +27,9 @@ module.exports = function(cb) {
           cb(null, s);
         }
       });
+    }
+    if (process.env.LOG_TO_CONSOLE) {
+      process.stdout.write(data);
     }
   });
 

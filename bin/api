@@ -24,11 +24,21 @@ server.on('bound', function(host, port) {
   console.log("running on http://" + host + ":" + port);
 });
 
+// TODO seperate config
+var dbConfig = {
+  hosts: [ 'localhost:8091' ],
+  username: 'admin',
+  password: null,
+  bucket: 'default'
+};
+
 // now load up api handlers
 apiLoader(server, function(err) {
   if (err) fatal(err);
-  // Start the server
-  server.start();
+  db.connect(dbConfig, function() {
+    // Start the server
+    server.start();
+  });
 });
 
 process.on('SIGTERM', function() {

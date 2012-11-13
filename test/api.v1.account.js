@@ -18,14 +18,15 @@ describe('the servers', function() {
   });
 });
 
-describe("/api/v1/context", function() {
-  it ("should return an object with two keys", function(done) {
-    client.context(function(err, r) {
+describe('/api/v1/account', function() {
+  it('staging should return success', function(done) {
+    client.account({
+      email: 'foo',
+      password: 'bar'
+    }, function(err, r) {
       should.not.exist(err);
       should.exist(r);
-      should.exist(r.session_context);
-      (r.server_time).should.be.a('number');
-      (r.entropy).should.be.a('string');
+      (r.success).should.be.true;
       done();
     });
   });
