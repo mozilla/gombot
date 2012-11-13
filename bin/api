@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 // This is the gombot API server!
-var     Hapi = require('hapi'),
-   apiLoader = require('../lib/api_loader.js');
+const Hapi      = require('hapi');
+const apiLoader = require('../lib/api_loader.js');
+const db        = require('../lib/db.js');
 
 function fatal(msg) {
   process.stderr.write("fatal error: " + msg + "\n");
@@ -10,15 +11,17 @@ function fatal(msg) {
 }
 
 var options = {
-  name: "Gombot Server",
+  name: "Gombot API Server",
   docs: true
 };
 
 // Create a server with a host and port
-var server = new Hapi.Server('127.0.0.1', (process.env.PORT ? parseInt(process.env.PORT) : 8080), options);
+var server = new Hapi.Server('127.0.0.1', (process.env.PORT ? parseInt(process.env.PORT) : 20001), options);
+
+console.log("api starting up");
 
 server.on('bound', function(host, port) {
-  process.stdout.write('bound to ' + host + ':' + port + "\n");
+  console.log("running on http://" + host + ":" + port);
 });
 
 // now load up api handlers

@@ -1,0 +1,10 @@
+{
+  "processes": [
+    "bin/router",
+    "bin/api",
+    "bin/static"
+  ],
+  "hooks": {
+    "postcreate": "scripts/post_create.sh"
+  }
+}

@@ -5,18 +5,20 @@
   "private": true,
   "dependencies": {
     "hapi": "git://github.com/lloyd/hapi#b12270",
-    "walkdir": "0.0.5"
+    "walkdir": "0.0.5",
+    "express": "3.0.2",
+    "nunjucks": "0.1.5"
   },
-  "optionalDependencies": {
-  },
+  "optionalDependencies": {},
   "devDependencies": {
     "awsbox": "0.3.3",
     "should": "1.2.1",
     "mocha": "1.6.0",
-    "xhrequest": "1.0.5"
+    "xhrequest": "1.0.5",
+    "node-inspector": "*"
   },
   "scripts": {
-    "test": "mocha -R spec",
-    "start": "node bin/api"
+    "test": "mocha -R spec -t 10000",
+    "start": "node scripts/run_locally.js"
   }
 }
