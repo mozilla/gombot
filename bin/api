@@ -16,7 +16,7 @@ var options = {
 };
 
 // Create a server with a host and port
-var server = new Hapi.Server('127.0.0.1', (process.env.PORT ? parseInt(process.env.PORT) : 20001), options);
+var server = new Hapi.Server('127.0.0.1', 20001, options);
 
 console.log("api starting up");
 

@@ -50,7 +50,7 @@ app.use(function(req, res, next) {
 });
 
 var bindTo = {
-  port: 20000,
+  port: process.env.PORT || 20000,
   host: host
 };
 
