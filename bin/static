@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 
 // gombot static file server!
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
-const http = require('http');
-const express = require('express');
+const fs       = require('fs');
+const path     = require('path');
+const url      = require('url');
+const http     = require('http');
+const express  = require('express');
 const nunjucks = require('nunjucks');
+const config   = require('../etc/config');
 
 var views = require('../lib/views.js');
 
 var app = express();
 var server = http.createServer(app);
 
-var host = process.env.GOMBOT_HOST || '127.0.0.1';
 var static_root = path.join(__dirname, "..", "public");
 
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader(path.join(__dirname, '..', 'views')));
@@ -30,11 +30,7 @@ views.setup(app);
 // set up static file serving
 app.use(express.static(static_root));
 
-var bindTo = {
-  port: 20002,
-  host: host
-};
-
+var bindTo = config.process.static;
 server.listen(bindTo.port, bindTo.host, function() {
   console.log("running on http://" + server.address().address + ":" + server.address().port);
 });

@@ -6,15 +6,14 @@ const path    = require('path');
 const url     = require('url');
 const http    = require('http');
 const express = require('express');
-
+const config  = require('../etc/config');
 const forward = require('../lib/http_forward').forward;
 
 var app = express();
 var server = http.createServer(app);
 
-var host       = process.env.GOMBOT_HOST || '127.0.0.1';
-var api_url    = 'http://' + host + ':20001'
-var static_url = 'http://' + host + ':20002'
+var api_url    = config.api_url;
+var static_url = config.static_url;
 
 console.log("router starting up");
 
@@ -49,11 +48,7 @@ app.use(function(req, res, next) {
     });
 });
 
-var bindTo = {
-  port: process.env.PORT || 20000,
-  host: host
-};
-
+var bindTo = config.process.router;
 server.listen(bindTo.port, bindTo.host, function(conn) {
   console.log("running on http://" + server.address().address + ":" + server.address().port);
 });

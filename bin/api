@@ -4,19 +4,16 @@
 const Hapi      = require('hapi');
 const apiLoader = require('../lib/api_loader.js');
 const db        = require('../lib/db.js');
+const config    = require('../etc/config');
 
 function fatal(msg) {
   process.stderr.write("fatal error: " + msg + "\n");
   process.exit(1);
 }
 
-var options = {
-  name: "Gombot API Server",
-  docs: true
-};
-
+var bindTo = config.process.api;
 // Create a server with a host and port
-var server = new Hapi.Server('127.0.0.1', 20001, options);
+var server = new Hapi.Server(bindTo.host, bindTo.port, config.hapi);
 
 console.log("api starting up");
 
@@ -24,18 +21,10 @@ server.on('bound', function(host, port) {
   console.log("running on http://" + host + ":" + port);
 });
 
-// TODO seperate config
-var dbConfig = {
-  hosts: [ 'localhost:8091' ],
-  username: 'admin',
-  password: null,
-  bucket: 'default'
-};
-
 // now load up api handlers
 apiLoader(server, function(err) {
   if (err) fatal(err);
-  db.connect(dbConfig, function() {
+  db.connect(config.db, function() {
     // Start the server
     server.start();
   });
