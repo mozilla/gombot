@@ -7,7 +7,8 @@
     "hapi": "git://github.com/lloyd/hapi#7e6cf0",
     "walkdir": "0.0.5",
     "express": "3.0.2",
-    "nunjucks": "0.1.5"
+    "nunjucks": "0.1.5",
+    "irc": "0.3.3"
   },
   "optionalDependencies": {
     "couchbase": "0.0.4"

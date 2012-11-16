@@ -1,0 +1,277 @@
+#!/usr/bin/env node
+
+const temp    = require('temp');
+const path    = require('path');
+const util    = require('util');
+const events  = require('events');
+const http    = require('http');
+const git     = require('awsbox/lib/git.js');
+const fs      = require('fs');
+const express = require('express');
+const irc     = require('irc');
+const config  = require('../etc/config');
+const spawn   = require('child_process').spawn;
+
+console.log("build server starting up");
+
+var buildScript = path.resolve(__dirname, '..', 'script', 'crxmake.sh');
+var downloadDir = path.join(__dirname, '..', 'downloads');
+
+var githubRepo  = 'git://github.com/mozilla/skycrane';
+var devBranch   = 'master';
+var downloadFile = 'latest.crx';
+
+var ircChannel = '#tobmog';
+
+// a class capable of deploying and emmitting events along the way
+function Builder(options) {
+  events.EventEmitter.call(this);
+  if (!options) optiosn = {};
+
+  this.repo = options.repo;
+  this.branch = options.branch;
+
+  // a directory where we'll keep code
+  this._codeDir = process.env['CODE_DIR'] || temp.mkdirSync();
+  console.log("code dir is:", this._codeDir);
+  var self = this;
+
+  git.init(this._codeDir, function(err) {
+    if (err) {
+      console.log("can't init code dir:", err);
+      process.exit(1);
+    }
+    self.emit('ready');
+  });
+}
+
+util.inherits(Builder, events.EventEmitter);
+
+Builder.prototype._writeSha = function(sha, cb) {
+  var self = this;
+  fs.writeFile(path.join(downloadDir, 'ver.txt'), sha, function(err, sha) {
+    if (err) self.emit('info', 'could not write last sha');
+    if (cb) cb(err);
+  });
+};
+
+Builder.prototype._getLatestRunningSHA = function(cb) {
+  var self = this;
+  fs.readFile(path.join(downloadDir, 'ver.txt'), 'utf8', function(err, sha) {
+    if (err) self.emit('info', 'could not get last sha');
+    if (cb) cb(err, sha);
+  });
+};
+
+Builder.prototype._buildNewCode = function(cb) {
+  var self = this;
+
+  function splitAndEmit(chunk) {
+    if (chunk) chunk = chunk.toString();
+    if (typeof chunk === 'string') {
+      chunk.split('\n').forEach(function (line) {
+        line = line.trim();
+        if (line.length) self.emit('progress', line);
+      });
+    }
+  }
+
+  console.log(buildScript);
+  var crxBuild = spawn(buildScript, [ self._codeDir, '~/.ssh/id_rsa' ], { cwd: self._codeDir });
+
+  crxBuild.stdout.on('data', splitAndEmit);
+  crxBuild.stderr.on('data', splitAndEmit);
+
+  crxBuild.on('exit', function(code, signal) {
+    if (code != 0) {
+      cb('could not build crx');
+      return;
+    }
+  });
+};
+
+Builder.prototype._pullLatest = function(cb) {
+  var self = this;
+  git.pull(this._codeDir, this.repo, this.branch, function(l) {
+    self.emit('progress', l);
+  }, function(err) {
+    if (err) return cb(err);
+    git.currentSHA(self._codeDir, function(err, latest) {
+      if (err) return cb(err);
+      self.emit('info', 'latest available sha is ' + latest);
+      self._getLatestRunningSHA(function(err, running) {
+        if (latest !== running) {
+          self.emit('deployment_begins', {
+            sha: latest,
+          });
+          var startTime = new Date();
+
+          self._buildNewCode(function(err, res) {
+            if (err) return cb(err);
+            self._writeSha(latest, function(err) {
+              // deployment is complete!
+              self.emit('deployment_complete', {
+                sha: latest,
+                time: (new Date() - startTime)
+              });
+              cb(null, null);
+            });
+          });
+        } else {
+          self.emit('info', 'up to date');
+          cb(null, null);
+        }
+      });
+    });
+  });
+}
+
+// may be invoked any time we suspect updates have occured to re-deploy
+// if needed
+Builder.prototype.checkForUpdates = function() {
+  var self = this;
+
+  if (this._busy) {
+    self.emit('info', 'busy');
+    return;
+  }
+
+  this._busy = true;
+  self.emit('info', 'checking for updates');
+
+  self._pullLatest(function(err, sha) {
+    if (err) self.emit('error', err);
+    self.emit('info', 'done checking');
+    self._busy = false;
+  });
+}
+
+// create dev builder
+var builder = new Builder({ repo: githubRepo, branch: devBranch });
+
+var currentLogFile = null;
+// a directory where we'll keep deployment logs
+var deployLogDir = process.env['DEPLOY_LOG_DIR'] || temp.mkdirSync();
+
+var deployingSHA = null;
+
+console.log("deployment log dir is:", deployLogDir);
+
+[ 'info', 'ready', 'error', 'deployment_begins', 'deployment_complete', 'progress' ].forEach(function(evName) {
+  builder.on(evName, function(data) {
+    if (data !== null && data !== undefined && typeof data != 'string') data = JSON.stringify(data, null, 2);
+    var msg = evName + (data ? (": " + data) : "")
+    console.log(msg)
+    if (currentLogFile) currentLogFile.write(msg + "\n");
+  });
+});
+
+// irc integration!
+var ircClient = null;
+function ircSend(msg) {
+  if (!ircClient) {
+    ircClient = new irc.Client('irc.mozilla.org', 'gombot_builder', {
+      channels: [ircChannel]
+    });
+    ircClient.on('error', function(e) {
+      console.log('irc error: ', e);
+    });
+    ircClient.once('join' + ircChannel, function(e) {
+      ircClient.say(ircChannel, msg);
+    });
+  } else {
+    ircClient.say(ircChannel, msg);
+  }
+}
+
+function ircDisconnect() {
+  setTimeout(function() {
+    if (ircClient) {
+      ircClient.disconnect();
+      ircClient = null;
+    }
+  }, 1000);
+}
+
+
+// now when deployment begins, we log all events
+builder.on('deployment_begins', function(r) {
+  currentLogFile = fs.createWriteStream(path.join(deployLogDir, r.sha + ".txt"));
+  currentLogFile.write("deployment of " + r.sha + " begins\n");
+  deployingSHA = r.sha;
+  ircSend("deploying " + r.sha);
+});
+
+function closeLogFile() {
+  if (currentLogFile) {
+    currentLogFile.end();
+    currentLogFile = null;
+  }
+}
+
+builder.on('deployment_complete', function(r) {
+  ircSend("deployment of " + deployingSHA + " completed successfully in " +
+          (r.time / 1000.0).toFixed(2) + "s");
+  ircDisconnect();
+
+  closeLogFile();
+  deployingSHA = null;
+
+  // always check to see if we should try another deployment after one succeeds to handle
+  // rapid fire commits
+  console.log('from complete');
+  builder.checkForUpdates();
+});
+
+builder.on('error', function(r) {
+  ircSend("deployment of " + deployingSHA + " failed.  check logs for deets");
+  ircDisconnect();
+
+  closeLogFile();
+  deployingSHA = null;
+
+  // on error, try again in 2 minutes
+  setTimeout(function () {
+    console.log('from error');
+    builder.checkForUpdates();
+  }, 2 * 60 * 1000);
+});
+
+
+// We check every 15 minutes, in case a cosmic ray hits and github's
+// webhooks fail, or other unexpected errors occur
+setInterval(function () {
+  console.log('from interval');
+  builder.checkForUpdates();
+}, (1000 * 60 * 15));
+
+// check for updates at startup
+builder.on('ready', function() {
+  console.log('from ready');
+  builder.checkForUpdates();
+});
+
+// setup build server
+var app = express();
+var server = http.createServer(app);
+
+var check = function(req, res) {
+  console.log('from check');
+  builder.checkForUpdates();
+  res.send('ok');
+};
+
+app.get('/check', check);
+app.post('/check', check);
+
+app.get('/', function(req, res) {
+  var what = "idle";
+  if (deployingSHA) what = "deploying " + deployingSHA;
+  res.send(what);
+});
+
+app.use(express.static(deployLogDir));
+
+server.listen(config.process.builder.port, config.process.builder.host, function() {
+  console.log("running on http://" + server.address().address + ":" + server.address().port);
+});

@@ -12,8 +12,9 @@ const forward = require('../lib/http_forward').forward;
 var app = express();
 var server = http.createServer(app);
 
-var api_url    = config.api_url;
-var static_url = config.static_url;
+var api_url     = config.api_url;
+var static_url  = config.static_url;
+var builder_url = config.builder_url + '/check';
 
 console.log("router starting up");
 
@@ -23,8 +24,28 @@ app.use(express.logger());
 // redirect requests to the "verifier" processes
 app.use(function(req, res, next) {
   if (/^\/api/.test(req.url)) {
-    forward(
-      api_url+req.url.replace(/^\/api/,''), req, res,
+    forward(api_url + req.url.replace(/^\/api/,''),
+      req, res,
+      function(err) {
+        if (err) {
+          console.error("error forwarding request:", err);
+          req.destroy();
+        }
+      });
+  } else {
+    return next();
+  }
+});
+
+// kick-off addon updates
+app.use(function(req, res, next) {
+  if (req.url === '/update_addons') {
+    // grab addon code from github
+    // run extension packager script
+    // issue update to installed extensions
+    //  - dev: updated every push
+    //  - nightly: updated every day to last dev
+    forward(builder_url, req, res,
       function(err) {
         if (err) {
           console.error("error forwarding request:", err);
@@ -38,8 +59,7 @@ app.use(function(req, res, next) {
 
 //static catch-all
 app.use(function(req, res, next) {
-  forward(
-    static_url+req.url, req, res,
+  forward(static_url + req.url, req, res,
     function(err) {
       if (err) {
         console.error("error forwarding request:", err);

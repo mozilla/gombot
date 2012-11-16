@@ -13,6 +13,10 @@ var config = module.exports = {
     static: {
       port: 20002,
       host: '127.0.0.1'
+    },
+    builder: {
+      port: 20003,
+      host: '127.0.0.1'
     }
   },
   hapi: {
@@ -29,3 +33,4 @@ var config = module.exports = {
 
 config.api_url = 'http://' + config.process.api.host + ':' + config.process.api.port;
 config.static_url = 'http://' + config.process.static.host + ':' + config.process.static.port;
+config.builder_url = 'http://' + config.process.builder.host + ':' + config.process.builder.port;

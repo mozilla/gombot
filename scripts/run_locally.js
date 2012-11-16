@@ -13,8 +13,12 @@ const HOST = process.env['GOMBOT_IP_ADDRESS'] || process.env['GOMBOT_HOST'] || "
 var daemonsToRun = {
   api: { },
   static: { },
+  builder: { },
   router: { }
 };
+
+// only run builder if specified
+//if (!process.env.BUILD_SERVER) delete daemonsToRun.builder;
 
 process.env['GOMBOT_HOST'] = HOST;
 
@@ -32,21 +36,9 @@ process.env['LOG_TO_CONSOLE'] = 1;
 process.env['GOMBOT_ROUTER_URL'] = 'http://' + HOST + ":20000";
 process.env['GOMBOT_API_URL']    = 'http://' + HOST + ":20001";
 process.env['GOMBOT_STATIC_URL'] = 'http://' + HOST + ":20002";
+process.env['GOMBOT_BUILDER_URL'] = 'http://' + HOST + ":20003";
 
 process.env['PUBLIC_URL'] = process.env['GOMBOT_ROUTER_URL'];
-
-// if the environment is a 'test_' environment, then we'll use an
-// ephemeral database
-/*if (config.get('env').substr(0,5) === 'test_') {*/
-  //if (config.get('database').driver === 'mysql') {
-    //process.env['DATABASE_NAME'] =
-      //process.env['DATABASE_NAME'] || "browserid_tmp_" + secrets.generate(6);
-    //console.log("temp mysql database:", process.env['DATABASE_NAME']);
-  //} else if (config.get('database').driver === 'json') {
-    //process.env['DATABASE_NAME'] =  process.env['DATABASE_NAME'] || temp.path({suffix: '.db'});
-    //console.log("temp json database:", process.env['DATABASE_NAME']);
-  //}
-/*}*/
 
 // Windows can't use signals, so lets figure out if we should use them
 // To force signals, set the environment variable SUPPORTS_SIGNALS=true.

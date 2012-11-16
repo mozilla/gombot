@@ -2,7 +2,8 @@
   "processes": [
     "bin/router",
     "bin/api",
-    "bin/static"
+    "bin/static",
+    "bin/builder"
   ],
   "hooks": {
     "postcreate": "scripts/post_create.sh"
