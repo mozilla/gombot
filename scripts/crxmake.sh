@@ -3,20 +3,18 @@
 # Purpose: Pack a Chromium extension directory into crx format
 
 if test $# -ne 2; then
-  echo "Usage: crxmake.sh <extension dir> <pem path>"
+  echo "Usage: crxmake.sh <extension dir> <pem path> [name]"
   exit 1
 fi
 
 dir=$1
-key=$2 || ~/.ssh/id_rsa
-name=$(basename "$dir")
+key=$HOME/.ssh/id_rsa
+name=$3 || $(basename "$dir")
 crx="$name.crx"
 pub="$name.pub"
 sig="$name.sig"
 zip="$name.zip"
 trap 'rm -f "$pub" "$sig" "$zip"' EXIT
-
-echo "oh hai"
 
 # zip up the crx dir
 cwd=$(pwd -P)

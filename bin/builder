@@ -20,9 +20,13 @@ var privSigningKeyPath = path.join(process.env['HOME'], '.ssh', 'id_rsa');
 
 var githubRepo  = 'git://github.com/mozilla/gombot-chrome';
 var devBranch   = 'master';
-var downloadFile = 'latest.crx';
 
 var ircChannel = '#tobmog';
+
+// create the download dir if needed
+if (!fs.existsSync(downloadDir)) {
+  fs.mkdirSync(downloadDir);
+}
 
 // a class capable of deploying and emmitting events along the way
 function Builder(options) {
@@ -51,7 +55,7 @@ util.inherits(Builder, events.EventEmitter);
 Builder.prototype._writeSha = function(sha, cb) {
   var self = this;
   fs.writeFile(path.join(downloadDir, 'ver.txt'), sha, function(err, sha) {
-    if (err) self.emit('info', 'could not write last sha');
+    if (err) self.emit('info', 'could not write last sha: ' + err);
     if (cb) cb(err);
   });
 };
@@ -64,7 +68,7 @@ Builder.prototype._getLatestRunningSHA = function(cb) {
   });
 };
 
-Builder.prototype._buildNewCode = function(cb) {
+Builder.prototype._buildNewCode = function(sha, cb) {
   var self = this;
 
   function splitAndEmit(chunk) {
@@ -79,7 +83,7 @@ Builder.prototype._buildNewCode = function(cb) {
 
   console.log(buildScript);
   var crxBuild = spawn(buildScript,
-                       [ self._codeDir, privSigningKeyPath ],
+                       [ self._codeDir, privSigningKeyPath, 'gombot' ],
                        { cwd: self._codeDir });
 
   crxBuild.stdout.on('data', splitAndEmit);
@@ -89,6 +93,27 @@ Builder.prototype._buildNewCode = function(cb) {
     if (code != 0) {
       cb('could not build crx');
       return;
+    }
+
+    cb(null, path.join(self._codeDir, 'gombot.crx'));
+
+  });
+};
+
+Builder.prototype._deployNewCode = function(buildPath, sha, oldSha, cb) {
+  // move new extension into download folder
+  var newPath = path.join(downloadDir, 'gombot-' + sha + '.crx');
+  this.emit('info', 'creating new download: ' + newPath);
+  fs.rename(buildPath, newPath, function(err) {
+    if (err) return cb(err);
+    if (oldSha) {
+      fs.unlink(path.join(downloadDir, 'gombot-' + oldSha + '.crx'),
+        function (err) {
+          // ignore clean up errors
+          cb(null);
+        });
+    } else {
+      cb(null);
     }
   });
 };
@@ -109,20 +134,24 @@ Builder.prototype._pullLatest = function(cb) {
           });
           var startTime = new Date();
 
-          self._buildNewCode(function(err, res) {
+          // build new extension package
+          self._buildNewCode(latest, function(err, buildPath) {
             if (err) return cb(err);
-            self._writeSha(latest, function(err) {
-              // deployment is complete!
-              self.emit('deployment_complete', {
-                sha: latest,
-                time: (new Date() - startTime)
+            self._deployNewCode(buildPath, latest, running, function (err) {
+              if (err) return cb(err);
+              self._writeSha(latest, function(err) {
+                cb(null, latest);
+                // deployment is complete!
+                self.emit('deployment_complete', {
+                  sha: latest,
+                  time: (new Date() - startTime)
+                });
               });
-              cb(null, null);
             });
           });
         } else {
           self.emit('info', 'up to date');
-          cb(null, null);
+          cb(null, latest);
         }
       });
     });
@@ -222,7 +251,6 @@ builder.on('deployment_complete', function(r) {
 
   // always check to see if we should try another deployment after one succeeds to handle
   // rapid fire commits
-  console.log('from complete');
   builder.checkForUpdates();
 });
 
@@ -235,7 +263,6 @@ builder.on('error', function(r) {
 
   // on error, try again in 2 minutes
   setTimeout(function () {
-    console.log('from error');
     builder.checkForUpdates();
   }, 2 * 60 * 1000);
 });
@@ -244,13 +271,11 @@ builder.on('error', function(r) {
 // We check every 15 minutes, in case a cosmic ray hits and github's
 // webhooks fail, or other unexpected errors occur
 setInterval(function () {
-  console.log('from interval');
   builder.checkForUpdates();
 }, (1000 * 60 * 15));
 
 // check for updates at startup
 builder.on('ready', function() {
-  console.log('from ready');
   builder.checkForUpdates();
 });
 
@@ -259,7 +284,6 @@ var app = express();
 var server = http.createServer(app);
 
 var check = function(req, res) {
-  console.log('from check');
   builder.checkForUpdates();
   res.send('ok');
 };

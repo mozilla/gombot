@@ -15,6 +15,7 @@ var app = express();
 var server = http.createServer(app);
 
 var static_root = path.join(__dirname, "..", "public");
+var download_root = path.join(__dirname, "..", "downloads");
 
 var env = new nunjucks.Environment(new nunjucks.FileSystemLoader(path.join(__dirname, '..', 'views')));
 env.express(app);
@@ -29,6 +30,7 @@ views.setup(app);
 
 // set up static file serving
 app.use(express.static(static_root));
+app.use('/downloads', express.static(download_root));
 
 var bindTo = config.process.static;
 server.listen(bindTo.port, bindTo.host, function() {
