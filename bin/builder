@@ -17,7 +17,7 @@ console.log("build server starting up");
 var buildScript = path.resolve(__dirname, '..', 'script', 'crxmake.sh');
 var downloadDir = path.join(__dirname, '..', 'downloads');
 
-var githubRepo  = 'git://github.com/mozilla/skycrane';
+var githubRepo  = 'git://github.com/mozilla/gombot-chrome';
 var devBranch   = 'master';
 var downloadFile = 'latest.crx';
 
