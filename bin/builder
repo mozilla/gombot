@@ -16,6 +16,7 @@ console.log("build server starting up");
 
 var buildScript = path.resolve(__dirname, '..', 'scripts', 'crxmake.sh');
 var downloadDir = path.join(__dirname, '..', 'downloads');
+var privSigningKeyPath = path.join(process.env['HOME'], '.ssh', 'id_rsa');
 
 var githubRepo  = 'git://github.com/mozilla/gombot-chrome';
 var devBranch   = 'master';
@@ -77,7 +78,9 @@ Builder.prototype._buildNewCode = function(cb) {
   }
 
   console.log(buildScript);
-  var crxBuild = spawn(buildScript, [ self._codeDir, '~/.ssh/id_rsa' ], { cwd: self._codeDir });
+  var crxBuild = spawn(buildScript,
+                       [ self._codeDir, privSigningKeyPath ],
+                       { cwd: self._codeDir });
 
   crxBuild.stdout.on('data', splitAndEmit);
   crxBuild.stderr.on('data', splitAndEmit);
