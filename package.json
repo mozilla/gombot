@@ -9,13 +9,13 @@
     "express": "3.0.2",
     "nunjucks": "0.1.5",
     "irc": "0.3.3",
+    "awsbox": "0.3.3",
     "temp": "0.4.0"
   },
   "optionalDependencies": {
     "couchbase": "0.0.4"
   },
   "devDependencies": {
-    "awsbox": "0.3.3",
     "should": "1.2.1",
     "mocha": "1.6.0",
     "xhrequest": "1.0.5",
