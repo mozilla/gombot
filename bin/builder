@@ -21,7 +21,7 @@ var privSigningKeyPath = path.join(process.env['HOME'], '.ssh', 'id_rsa');
 var githubRepo  = 'git://github.com/mozilla/gombot-chrome';
 var devBranch   = 'master';
 
-var ircChannel = '#tobmog';
+var ircChannel = '#gombot';
 
 // create the download dir if needed
 if (!fs.existsSync(downloadDir)) {
