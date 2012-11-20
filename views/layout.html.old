@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class=" js no-flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients no-cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths" dir="ltr" lang="en-US"><!--<![endif]-->
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+    <title>{% block title %}Gombot{% endblock %}</title>
+
+    <link href="/style/tabzilla.css" rel="stylesheet">
+
+    <script src="/js/modernizr-2.js"></script>
+
+    <meta name="viewport" content="width=device-width">
+
+    <link rel="stylesheet" media="screen,projection,tv" href="style/common-min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="https://mozillalabs.com/media/img/favicon.png">
+  </head>
+
+  <!-- Note the "windows" class, without javascript platform-specific
+       assets default to windows -->
+  <body id="home" class="html-ltr windows home"><div tabindex="-1" class="tabzilla-closed" id="tabzilla-panel"><div id="tabzilla-contents">  <div id="tabzilla-promo">    <div class="snippet" id="tabzilla-promo-mobile">    <a href="https://www.mozilla.org/firefox/fx/?WT.mc_id=tzfxmobile&amp;WT.mc_ev=click#mobile">     <h4>Fast. Smart. Safe.</h4>     <p>Get Firefox for Android&nbsp;»</p></a>    </div>  </div>  <div id="tabzilla-nav">    <ul>      <li><h2>Mozilla</h2>        <ul>          <li><a href="https://www.mozilla.org/mission/">Mission</a></li>          <li><a href="https://www.mozilla.org/about/">About</a></li>          <li><a href="https://www.mozilla.org/projects/">Projects</a></li>          <li><a href="https://support.mozilla.org/">Support</a></li>          <li><a href="https://developer.mozilla.org/">Developer Network</a></li>        </ul>      </li>      <li><h2>Products</h2>        <ul>          <li><a href="https://www.mozilla.org/firefox">Firefox</a></li>          <li><a href="https://www.mozilla.org/thunderbird">Thunderbird</a></li>          <li><a href="https://www.mozilla.org/firefoxos">Firefox OS</a></li>        </ul>      </li>      <li><h2>Innovations</h2>        <ul>          <li><a href="https://webfwd.org/">WebFWD</a></li>          <li><a href="https://mozillalabs.com/">Labs</a></li>          <li><a href="https://webmaker.org/">Webmaker</a></li>        </ul>      </li>      <li><h2>Get Involved</h2>        <ul>          <li><a href="https://www.mozilla.org/contribute/">Volunteer</a></li>          <li><a href="https://www.mozilla.org/en-US/about/careers.html">Careers</a></li>          <li><a href="https://www.mozilla.org/en-US/about/mozilla-spaces/">Find us</a></li>          <li><a href="https://donate.mozilla.org/">Join us</a></li>        </ul>      </li>      <li id="tabzilla-search">        <a href="https://www.mozilla.org/community/directory.html">Website Directory</a>        <form title="Search Mozilla sites" role="search" action="http://www.google.com/cse">          <input value="002443141534113389537:ysdmevkkknw" name="cx" type="hidden">          <input value="FORID:0" name="cof" type="hidden">          <label for="q">Search</label>          <input placeholder="Search" id="q" name="q" type="search">        </form>      </li>    </ul>  </div></div></div>
+    <div id="outer-wrapper">
+    <div id="wrapper">
+
+    <header id="masthead">
+      <a title="Mozilla links" aria-controls="tabzilla-panel" aria-expanded="false" role="button" class="tabzilla-closed" href="http://www.mozilla.org/" id="tabzilla">Mozilla</a>
+      <nav id="nav-main" role="navigation">
+      <ul>
+        <li><a class="current" href="https://mozillalabs.com/en-US/">Home</a></li>
+        <li><a class="" href="https://mozillalabs.com/en-US/about/">About</a></li>
+        <li><a class="" href="https://mozillalabs.com/en-US/projects/">Projects</a></li>
+        <li><a href="http://blog.mozilla.com/labs/">Blog</a></li>
+      </ul>
+      </nav>
+      <h1><a href="https://mozillalabs.com/en-US/"><img src="/images/logo.png" alt="mozilla labs"></a></h1>
+    </header>
+
+
+    <hgroup id="main-feature" class="splash center">
+      <h2>Tired of remembering your usernames and passwords?</h2>
+      <h1>Let Gombot do the work for you.</h1>
+    </hgroup>
+
+  <div id="main-content">
+    <div class="row">
+      {% block body %}
+      {% endblock %}
+    </div>
+  </div>
+
+</div><!-- close #wrapper -->
+
+<footer id="colophon">
+<div class="row">
+
+    <div class="span3">
+        <a href="https://mozillalabs.com/" class="footer-logo"><img src="/images/footer-mozilla.png" alt="mozilla"></a>
+    </div>
+
+    <nav class="span3">
+        <ul>
+            <li>
+              <a href="https://twitter.com/#%21/mozlabs">Contact Us</a>
+            </li>
+            <li>
+              <a href="https://www.mozilla.org/en-US/privacy-policy.html">
+                Privacy Policy
+              </a>
+            </li>
+            <li>
+              <a href="https://www.mozilla.org/en-US/about/legal.html">
+                Legal Notices
+              </a>
+            </li>
+            <li>
+              <a href="https://www.mozilla.org/en-US/legal/fraud-report/index.html">
+                Report Trademark Abuse</a>
+            </li>
+                          <li>
+                <form method="POST" action="/en-US/browserid/verify/" id="browserid_form">
+                  <div style="display:none"><input name="csrfmiddlewaretoken" value="77574c1f95cae533c8fe38b7676120e3" type="hidden"></div>
+                  <a id="browserid" class="login" href="#">
+                    Sign In (for project members)
+                  </a>
+                  <input name="assertion" id="id_assertion" type="hidden">
+                </form>
+              </li>
+            </ul>
+    </nav>
+
+</div>
+</footer>
+</div><!-- close #outer-wrapper -->
+
+<script src="/js/common-min.js"></script>
+<noscript>
+  <div><img alt="DCSIMG" id="DCSIMG" width="1" height="1" src="https://statse.webtrendslive.com/dcs2llglp00000k3wqbsoinmj_7u8n/njs.gif?dcsuri=/nojavascript&amp;WT.js=No&amp;WT.tv=8.6.2"/></div>
+</noscript>
+<script type="text/javascript" src="/js/tabzilla.js"></script>
+
+</body></html>

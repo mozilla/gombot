@@ -1,0 +1,16 @@
+.gombot #outer-wrapper {
+  border-top: 2px solid #fff;
+  background: #f9f9f9 url(/img/sandstone/bg-labs.png) 0 0 repeat-x;
+}
+
+.splash h1 {
+    font-size: 60px;
+    letter-spacing: -4px;
+    line-height: 100%;
+}
+
+.splash h2 {
+    font-size: 37px;
+    letter-spacing: -1px;
+    line-height: 150%;
+}

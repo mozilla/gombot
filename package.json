@@ -17,7 +17,9 @@
     "should": "1.2.1",
     "mocha": "1.6.0",
     "xhrequest": "1.0.5",
-    "node-inspector": "*"
+    "node-inspector": "*",
+    "grunt-contrib-less": ">=0.3.x",
+    "grunt-css": ">=0.2.x"
   },
   "scripts": {
     "test": "mocha -R spec -t 10000",

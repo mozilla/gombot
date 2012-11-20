@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- If you are using sandstone for a static website, you can safely delete this file -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{% block page_title_prefix %}Mozilla — {% endblock %}{% block page_title %}{% endblock %}{% block page_title_suffix %} — mozilla.org{% endblock %}</title>
+        <title>Mozilla - Your Site Title - yourdomain.org</title>
 
         <link rel="shortcut icon" href="img/favicon.ico" />
         <link rel="stylesheet" type="text/css" href="//www.mozilla.org/tabzilla/media/css/tabzilla.css" media="screen" />
@@ -14,19 +13,13 @@
         <script src="js/libs/html5shiv.js"></script>
         <![endif]-->
 
-        {% block css %}
         <link rel="stylesheet" type="text/css" href="css/sandstone-resp.css" media="screen" />
-        <link rel="stylesheet" type="text/css" href="css/gombot.css" media="screen" />
-        {% endblock %}
-
-        {% block extrahead %}{% endblock %}
     </head>
     <!-- The four different themes of sandstone are, stone, sand, sky, space. Replace the class on the
          body tag below, with the theme you wish to use for your project -->
-    <body id="sandstone" class="sand gombot">
+    <body id="{% block body_id %}{% endblock %}" class="html-{{ DIR }} {% block body_class %}{% endblock %}"{% block body_attrs %}{% endblock %}>
         <div id="outer-wrapper">
             <div id="wrapper">
-                {% block site_header %}
                 <header id="masthead">
                     <a href="http://www.mozilla.org/" id="tabzilla">Mozilla</a>
                     <nav id="nav-main" role="menubar">
@@ -38,26 +31,23 @@
                             <li role="menuitem" class="last"><a href="//www.mozilla.org/en-US/contribute/">Get Involved</a></li>
                         </ul>
                     </nav>
-
-                    {% block site_header_logo %}
-                    <h2><a href="http://mozilla.org/"><img src="/img/sandstone/header-mozilla-labs.png" alt="mozilla"></a></h2>
-                    {% endblock %}
-
-                    {% block breadcrumbs %}{% endblock %}
-
+                    <h2><a href="http://mozilla.org/"><img src="/img/sandstone/header-mozilla-stone.png" alt="mozilla"></a></h2>
                 </header>
-                {% endblock %}
 
-                <hgroup id="main-feature" class="splash center">
-                  <h2>Tired of remembering your usernames and passwords?</h2>
-                  <h1>Let Gombot do the work for you.</h1>
+                <hgroup id="main-feature" class="huge center">
+                    <h1>Your Site</h1>
+                    <h2>your site's tagline if you need it</h2>
                 </hgroup>
 
-                {% block content %}{% endblock %}
-
+                <nav class="menu-bar billboard">
+                    <ul>
+                        <li><a href="#">Link One</a></li>
+                        <li><a href="#">Link Two</a></li>
+                        <li><a href="#">Link Three</a></li>
+                        <li><a href="#">Link Four</a></li>
+                    </ul>
+                </nav>
             </div>
-
-            {% block site_footer %}
             <footer id="colophon">
               <div class="row">
                   <div class="footer-logo">
@@ -82,9 +72,7 @@
                   </ul>
               </div>
             </footer>
-            {% endblock %}
         </div>
         <script src="//www.mozilla.org/tabzilla/media/js/tabzilla.js"></script>
-        {% block js %}{% endblock %}
     </body>
 </html>
