@@ -8,7 +8,8 @@
     "walkdir": "0.0.5",
     "express": "3.0.2",
     "nunjucks": "0.1.5",
-    "irc": "0.3.3"
+    "irc": "0.3.3",
+    "temp": "0.4.0"
   },
   "optionalDependencies": {
     "couchbase": "0.0.4"
