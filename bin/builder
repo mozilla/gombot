@@ -52,9 +52,9 @@ function Builder(options) {
 
 util.inherits(Builder, events.EventEmitter);
 
-Builder.prototype._writeSha = function(sha, cb) {
+Builder.prototype._writeSha = function(sha, version, cb) {
   var self = this;
-  fs.writeFile(path.join(downloadDir, 'ver.txt'), sha, function(err, sha) {
+  fs.writeFile(path.join(downloadDir, 'ver.txt'), sha + ' ' + version, function(err, sha) {
     if (err) self.emit('info', 'could not write last sha: ' + err);
     if (cb) cb(err);
   });
@@ -62,9 +62,15 @@ Builder.prototype._writeSha = function(sha, cb) {
 
 Builder.prototype._getLatestRunningSHA = function(cb) {
   var self = this;
-  fs.readFile(path.join(downloadDir, 'ver.txt'), 'utf8', function(err, sha) {
+  fs.readFile(path.join(downloadDir, 'ver.txt'), 'utf8', function(err, shaVer) {
     if (err) self.emit('info', 'could not get last sha');
-    if (cb) cb(err, sha);
+    if (shaVer) {
+      var split = shaVer.split(' ');
+      var sha = split[0];
+      var ver = split[1];
+      if (cb) return cb(err, sha, ver);
+    }
+    if (cb) cb(err);
   });
 };
 
@@ -118,6 +124,11 @@ Builder.prototype._deployNewCode = function(buildPath, sha, oldSha, cb) {
   });
 };
 
+Builder.prototype._latestManifest = function() {
+  var manifest = require(path.resolve(this._codeDir, 'manifest.json'));
+  return manifest;
+};
+
 Builder.prototype._pullLatest = function(cb) {
   var self = this;
   git.pull(this._codeDir, this.repo, this.branch, function(l) {
@@ -126,11 +137,13 @@ Builder.prototype._pullLatest = function(cb) {
     if (err) return cb(err);
     git.currentSHA(self._codeDir, function(err, latest) {
       if (err) return cb(err);
+      var latestVer = self._latestManifest().version;
       self.emit('info', 'latest available sha is ' + latest);
-      self._getLatestRunningSHA(function(err, running) {
+      self._getLatestRunningSHA(function(err, running, runningVer) {
         if (latest !== running) {
           self.emit('deployment_begins', {
             sha: latest,
+            version: latestVer
           });
           var startTime = new Date();
 
@@ -139,11 +152,12 @@ Builder.prototype._pullLatest = function(cb) {
             if (err) return cb(err);
             self._deployNewCode(buildPath, latest, running, function (err) {
               if (err) return cb(err);
-              self._writeSha(latest, function(err) {
+              self._writeSha(latest, latestVer, function(err) {
                 cb(null, latest);
                 // deployment is complete!
                 self.emit('deployment_complete', {
                   sha: latest,
+                  version: latestVer,
                   time: (new Date() - startTime)
                 });
               });
