@@ -5,7 +5,7 @@ const path    = require('path');
 const util    = require('util');
 const events  = require('events');
 const http    = require('http');
-const git     = require('awsbox/lib/git.js');
+const git     = require('../lib/git.js');
 const fs      = require('fs');
 const express = require('express');
 const irc     = require('irc');
@@ -134,39 +134,43 @@ Builder.prototype._pullLatest = function(cb) {
   git.pull(this._codeDir, this.repo, this.branch, function(l) {
     self.emit('progress', l);
   }, function(err) {
-    if (err) return cb(err);
-    git.currentSHA(self._codeDir, function(err, latest) {
+    git.updateSubmodules(self._codeDir, function(l) {
+      self.emit('progress', l);
+    }, function(err) {
       if (err) return cb(err);
-      var latestVer = self._latestManifest().version;
-      self.emit('info', 'latest available sha is ' + latest);
-      self._getLatestRunningSHA(function(err, running, runningVer) {
-        if (latest !== running) {
-          self.emit('deployment_begins', {
-            sha: latest,
-            version: latestVer
-          });
-          var startTime = new Date();
+      git.currentSHA(self._codeDir, function(err, latest) {
+        if (err) return cb(err);
+        var latestVer = self._latestManifest().version;
+        self.emit('info', 'latest available sha is ' + latest);
+        self._getLatestRunningSHA(function(err, running, runningVer) {
+          if (latest !== running) {
+            self.emit('deployment_begins', {
+              sha: latest,
+              version: latestVer
+            });
+            var startTime = new Date();
 
-          // build new extension package
-          self._buildNewCode(latest, function(err, buildPath) {
-            if (err) return cb(err);
-            self._deployNewCode(buildPath, latest, running, function (err) {
+            // build new extension package
+            self._buildNewCode(latest, function(err, buildPath) {
               if (err) return cb(err);
-              self._writeSha(latest, latestVer, function(err) {
-                cb(null, latest);
-                // deployment is complete!
-                self.emit('deployment_complete', {
-                  sha: latest,
-                  version: latestVer,
-                  time: (new Date() - startTime)
+              self._deployNewCode(buildPath, latest, running, function (err) {
+                if (err) return cb(err);
+                self._writeSha(latest, latestVer, function(err) {
+                  cb(null, latest);
+                  // deployment is complete!
+                  self.emit('deployment_complete', {
+                    sha: latest,
+                    version: latestVer,
+                    time: (new Date() - startTime)
+                  });
                 });
               });
             });
-          });
-        } else {
-          self.emit('info', 'up to date');
-          cb(null, latest);
-        }
+          } else {
+            self.emit('info', 'up to date');
+            cb(null, latest);
+          }
+        });
       });
     });
   });
