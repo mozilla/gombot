@@ -3,5 +3,22 @@
 {% block page_title %}Gombot{% endblock %}
 
 {% block content %}
-<a href="/downloads/latest">Download Gombot!</a>
+<div id="main-content">
+<div class="row">
+  <section id="sign-up" class="container">
+    <img src="/img/mascot-gombot.png" id="logo" />
+
+    <div id="splash-box">
+      <form action="/join_alpha" method="post">
+      <h3>Join our alpha test list</h3>
+      <label>email</label> <input type="text" value="" name="email" class="sign-up-input" />
+      <button class="button-blue sign-up-button">Sign me up &raquo;</button>
+      </form>
+    </div>
+
+    <!--<a href="/downloads/latest">Download Gombot!</a>-->
+  </section>
+</div>
+{% include "description.html" %}
+</div>
 {% endblock %}

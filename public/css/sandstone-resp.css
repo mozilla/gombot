@@ -769,6 +769,27 @@ li.os_android,
   padding-right: 30px;
   text-shadow: 0 1px rgba(255, 255, 255, 0.2);
 }
+.full-width-container {
+  float: left;
+  width: 940px;
+  margin: 0 10px;
+}
+.two-column .sidebar {
+  float: left;
+  width: 220px;
+  margin: 0 10px;
+}
+.two-column .main-content {
+  float: left;
+  width: 620px;
+  margin: 0 10px;
+  margin-left: 90px;
+}
+.two-column .split {
+  float: left;
+  width: 460px;
+  margin: 0 10px;
+}
 /* {{{ Basic Colors, Text, Links */
 html {
   background: #fff;

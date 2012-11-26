@@ -1,16 +1,104 @@
 .gombot #outer-wrapper {
   border-top: 2px solid #fff;
-  background: #f9f9f9 url(/img/sandstone/bg-labs.png) 0 0 repeat-x;
+  background: rgb(246, 246, 246) url(/img/sandstone/bg-labs.png) 0 0 repeat-x;
+}
+
+.gombot #main-feature {
+  padding-top: 50px;
+  padding-bottom: 18px;
+}
+
+.gombot .sign-up-button {
+  height: 34px;
+  line-height: 24px;
+}
+
+.gombot .sign-up-input {
+  margin-right: 10px;
+  width: 18em;
 }
 
 .splash h1 {
-    font-size: 60px;
+    font-size: 63px;
     letter-spacing: -4px;
     line-height: 100%;
 }
 
 .splash h2 {
-    font-size: 37px;
+    font-size: 40px;
     letter-spacing: -1px;
     line-height: 150%;
+}
+
+.splash {
+}
+
+#sign-up {
+  position: relative;
+  margin: 0 auto;
+  width: 700px;
+  text-align: middle;
+  padding-bottom: 54px;
+}
+
+#logo {
+  position: relative;
+  float: left;
+  z-index: 2;
+}
+
+#splash-box {
+  position: relative;
+  background-color: rgb(190, 221, 227);
+  background-image: url("/img/shadow.png");
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  display: inline;
+  margin-left: -100px;
+  margin-top: 66px;
+  float: left;
+  z-index: 1;
+  padding: 25px 25px 67px 80px;
+}
+
+#splash-box {
+  color: #666;
+  font-family: 'Open Sans Light', sans-serif;
+  font-size: 90%;
+}
+
+.gombot .description {
+  font-family: 'Open Sans Light', sans-serif;
+}
+
+.gombot .description img {
+  padding: 0 5px;
+}
+
+#splash-box .download {
+  padding-left: 50px;
+  padding-right: 25px;
+}
+
+#splash-box .download-button {
+  position: relative;
+  height: 52px;
+  text-align: left;
+  padding-left: 48px;
+  font-size: 130%;
+}
+
+#splash-box a.download-button {
+  line-height: 28px;
+}
+
+.download-button img {
+  position: absolute;
+  top: -5px;
+  left: -24px;
+}
+
+#splash-box .alts {
+  display: block;
+  padding-top: 15px;
 }

@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block page_title %}Download Gombot{% endblock %}
+
+{% block content %}
+<div id="main-content">
+<div class="row">
+  <section id="sign-up" class="container">
+    <img src="/img/mascot-gombot.png" id="logo" />
+
+    <div id="splash-box">
+      <div class="download">
+      <a href="/downloads/latest" class="button-blue download-button">
+        <img src="/img/{{ logo }}" />
+        Download Gombot <small>for {{ agent }}</small>
+      </a>
+      <span class="alts">coming soon for Firefox and Apple iPhone</span>
+      </div>
+    </div>
+
+  </section>
+</div>
+{% include "description.html" %}
+</div>
+{% endblock %}
