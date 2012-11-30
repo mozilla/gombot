@@ -8,7 +8,7 @@
   padding-bottom: 18px;
 }
 
-.gombot .sign-up-button {
+.gombot button {
   height: 34px;
   line-height: 24px;
 }
@@ -16,6 +16,10 @@
 .gombot .sign-up-input {
   margin-right: 10px;
   width: 18em;
+}
+
+.gombot h2 img {
+  vertical-align: middle;
 }
 
 .splash h1 {
@@ -61,9 +65,12 @@
   padding: 25px 25px 67px 80px;
 }
 
-#splash-box {
+.gombot #main-content {
   color: #666;
   font-family: 'Open Sans Light', sans-serif;
+}
+
+.gombot label {
   font-size: 90%;
 }
 
