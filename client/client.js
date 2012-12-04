@@ -1,3 +1,7 @@
+if (typeof GombotCrypto === 'undefined') {
+  var GombotCrypto = require('./crypto.js');
+}
+
 ;(function() {
 
 GombotClient = function(host, port) {
@@ -6,10 +10,6 @@ GombotClient = function(host, port) {
 };
 
 var xhr = typeof jQuery !== 'undefined' ? jQuery.ajax : require('xhrequest');
-
-if (typeof GombotCrypto === 'undefined') {
-  var GombotCrypto = require('./crypto.js');
-}
 
 function request(args, cb) {
   var url = args.scheme ? args.scheme : 'http';
