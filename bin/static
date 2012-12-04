@@ -22,8 +22,8 @@ env.express(app);
 
 console.log("static starting up");
 
-// set up logging
 app.use(express.logger());
+app.use(express.bodyParser());
 
 // set up rendered views
 views.setup(app);
