@@ -1,3 +1,12 @@
+
+if (typeof sjcl === 'undefined') {
+  var sjcl = require('./sjcl.js');
+}
+
+if (typeof URLParse === 'undefined') {
+  var URLParse = require('./urlparse.js');
+}
+
 var GombotCrypto = (function() {
   // the number of rounds used in PBKDF2 to generate a stretched derived
   // key from a user password.
@@ -21,14 +30,6 @@ var GombotCrypto = (function() {
     PUT: true,
     DELETE: true
   };
-
-  if (typeof sjcl === 'undefined') {
-    var sjcl = require('./sjcl.js');
-  }
-
-  if (typeof URLParse === 'undefined') {
-    var URLParse = require('./urlparse.js');
-  }
 
   return {
     seed: function(entropy, cb) {
