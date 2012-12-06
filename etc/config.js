@@ -21,7 +21,10 @@ var config = module.exports = {
   },
   hapi: {
     name: "Gombot API Server",
-    docs: true
+    docs: true,
+    auth: {
+      scheme: 'hawk'
+    }
   },
   db: {
     hosts: [ 'localhost:8091' ],

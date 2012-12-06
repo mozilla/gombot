@@ -12,7 +12,7 @@ describe('the servers', function() {
       should.not.exist(err);
       should.exist(r);
       servers = r;
-      client = new Client(servers.host, servers.port);
+      client = new Client('http://' + servers.host + ':' + servers.port);
       done();
     });
   });
@@ -22,7 +22,7 @@ describe('/api/v1/account', function() {
   it('staging should return success', function(done) {
     client.account({
       email: 'foo',
-      password: 'bar'
+      pass: 'bar'
     }, function(err, r) {
       should.not.exist(err);
       should.exist(r);

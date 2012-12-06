@@ -11,22 +11,38 @@ function fatal(msg) {
   process.exit(1);
 }
 
-var bindTo = config.process.api;
+function credentialsFunc(id, callback) {
+  db.getAuthKey(id, function (err, key){
+    if (err) return callback(err);
+
+    var credentials = {
+        id: id,
+        key: key,
+        algorithm: 'hmac-sha-256',
+        user: id
+    };
+
+    return callback(null, credentials);
+  });
+}
+
+var apiOptions = config.hapi;
+apiOptions.auth.getCredentialsFunc = credentialsFunc;
+
 // Create a server with a host and port
-var server = new Hapi.Server(bindTo.host, bindTo.port, config.hapi);
+var bindTo = config.process.api;
+var server = new Hapi.Server(bindTo.host, bindTo.port, apiOptions);
 
 console.log("api starting up");
-
-server.on('bound', function(host, port) {
-  console.log("running on http://" + host + ":" + port);
-});
 
 // now load up api handlers
 apiLoader(server, function(err) {
   if (err) fatal(err);
   db.connect(config.db, function() {
     // Start the server
-    server.start();
+    server.start(function() {
+      console.log("running on http://" + server.settings.host + ":" + server.settings.port);
+    });
   });
 });
 
