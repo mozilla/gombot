@@ -33,6 +33,9 @@ apiOptions.auth.getCredentialsFunc = credentialsFunc;
 var bindTo = config.process.api;
 var server = new Hapi.Server(bindTo.host, bindTo.port, apiOptions);
 
+// don't require authorization for docs
+server._routes['get'][0].config.auth = config.hapi.docs.auth;
+
 console.log("api starting up");
 
 // now load up api handlers
