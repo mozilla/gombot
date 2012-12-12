@@ -22,7 +22,8 @@ describe('/api/v1/account', function() {
   it('staging should return success', function(done) {
     client.account({
       email: 'foo',
-      pass: 'bar'
+      pass: 'bar',
+      newsletter: false
     }, function(err, r) {
       should.not.exist(err);
       should.exist(r);
