@@ -17,7 +17,7 @@ function credentialsFunc(id, callback) {
 
     var credentials = {
         id: id,
-        key: key,
+        key: new Buffer(key, 'base64'),
         algorithm: 'hmac-sha-256',
         user: id
     };
