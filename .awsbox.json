@@ -5,6 +5,11 @@
     "bin/static",
     "bin/builder"
   ],
+  "env": {
+    "NODE_ENV": "production",
+    "DB_STORE": "couchbase",
+    "PUBLIC_URL": "http://dev.tobmog.org/"
+  },
   "hooks": {
     "postcreate": "scripts/post_create.sh"
   }

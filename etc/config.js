@@ -30,10 +30,12 @@ var config = module.exports = {
       scheme: 'hawk'
     }
   },
+  env: process.env.NODE_ENV || 'development',
   db: {
+    store: process.env.DB_STORE || 'json',
     hosts: [ 'localhost:8091' ],
-    username: 'Administration',
-    password: process.env.DB_PASSWORD || null,
+    username: 'Administrator',
+    password: process.env.DB_PASSWORD || 'password',
     bucket: process.env.DB_BUCKET || 'default'
   }
 };

@@ -51,4 +51,6 @@ apiLoader(server, function(err) {
 
 process.on('SIGTERM', function() {
   server.stop();
+  // db won't close unless exit called explicitly
+  process.exit(0);
 });

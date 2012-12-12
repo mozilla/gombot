@@ -14,7 +14,7 @@
     "hawk": "0.0.6"
   },
   "optionalDependencies": {
-    "couchbase": "0.0.4"
+    "couchbase": "0.0.7"
   },
   "devDependencies": {
     "should": "1.2.1",
