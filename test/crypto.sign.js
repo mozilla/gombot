@@ -77,8 +77,7 @@ describe('GumbotCrypto.sign', function() {
         should.not.exist(err);
         should.exist(rez);
         (rez.Authorization).should.be.a('string');
-        //(rez.Authorization).should.equal('MAC id="bar", ts="1352177818", nonce="one time only please", mac="Zt21WXS7nkwIUdocxbzMBsXKv+0NREsxQ7aBHA9MS4w="');
-        (rez.Authorization).should.equal('Hawk id="bar", ts="1352177818", ext="one time only please", mac="2JSJGewL+/9eoCKgf51mEbhI4cZuEVqNEeZkC3SfXp4="');
+        (rez.Authorization).should.equal('Hawk id="bar", ts="1352177818", ext="one time only please", mac="PUiIAcoruPIarsFALtc/1lTThcYVDmzZHtvuluHHvmQ="');
         done();
       });
     });

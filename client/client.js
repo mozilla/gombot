@@ -34,13 +34,15 @@ function request(args, cb) {
     //accepts: {json: 'application/json'},
     headers: args.headers || {},
     success: function(data, res, status) {
-      try {
-        var body = JSON.parse(data);
-      } catch (e) {
-        return cb('Invalid JSON response: ' + e);
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          return cb('Invalid JSON response: ' + e);
+        }
       }
-      body.session_context = {};
-      cb(null, body);
+      data.session_context = {};
+      cb(null, data);
     },
     processData: false,
     error: function(data, res, status) {

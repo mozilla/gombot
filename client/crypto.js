@@ -1,14 +1,11 @@
 
 if (typeof sjcl === 'undefined') {
   var sjcl = require('./sjcl.js');
+  var Hawk = require('hawk');
 }
 
 if (typeof URLParse === 'undefined') {
   var URLParse = require('./urlparse.js');
-}
-
-if (typeof Hawk  === 'undefined') {
-  var Hawk = require('hawk');
 }
 
 var GombotCrypto = (function() {
@@ -126,49 +123,47 @@ var GombotCrypto = (function() {
       //var keyBits = sjcl.codec.base64.toBits(args.key);
 
       var url = URLParse(args.url);
-      //// add a port if default is in use
-      //if (!args.url.port) {
-        //args.url.port = (args.url.scheme === 'https' ? '443' : '80');
-      //}
+      // add a port if default is in use
+      if (!url.port) {
+        url.port = (url.scheme === 'https' ? '443' : '80');
+      }
 
       setTimeout(function() {
-        // see https://tools.ietf.org/html/draft-ietf-oauth-v2-http-mac-01
-        // for normalization procedure
-        //var hmac = new sjcl.misc.hmac(keyBits);
-        //var body =
-          //// string representation of seconds since epoch
-          //args.date.toString() + "\n" +
-          //// random nonce
-          //args.nonce + '\n' +
-          //// normalized method
-          //args.method + '\n' +
-          //// path
-          //args.path + '\n' +
-          //// hostname
-          //args.host + '\n' +
-          //// port
-          //args.port + '\n' +
-          //// payload
-          //args.payload + '\n';
+        if (typeof Hawk === 'undefined') {
+          //var hmac = new sjcl.misc.hmac(keyBits);
+          var hmac = new sjcl.misc.hmac(args.key);
+          var body =
+            // string representation of seconds since epoch
+            args.date.toString() + "\n" +
+            // normalized method
+            args.method + '\n' +
+            // path
+            url.path + '\n' +
+            // hostname
+            url.host + '\n' +
+            // port
+            url.port + '\n' +
+            // random nonce
+            args.nonce + '\n';
 
-        //var mac = sjcl.codec.base64.fromBits(hmac.mac(body));
+          console.log('body', body);
+          var mac = sjcl.codec.base64.fromBits(hmac.mac(body));
+          var header = 'Hawk id="' + args.email + '", ts="' + args.date + (args.nonce ? '", ext="' + args.nonce : '') + '", mac="' + mac + '"';
+          var headers = {
+            Authorization: header
+          };
+        } else {
+          var credentials = {
+            id: args.email,
+            key: new Buffer(args.key, 'base64'),
+            algorithm: 'hmac-sha-256'
+          };
 
-        //// now formulate the authorization header.
-        //var val =
-          //'MAC id="' + args.email + '", ' +
-          //'ts="' + args.date + '", ' +
-          //'nonce="' + args.nonce + '", ' +
-          //'mac="' + mac + '"';
-
-        var credentials = {
-          id: args.email,
-          key: args.key,
-          algorithm: 'hmac-sha-256'
-        };
-
-        var headers = {
-          Authorization: Hawk.getAuthorizationHeader(credentials, args.method, args.url, url.host, url.port, args.nonce, args.date)
-        };
+          var headers = {
+            Authorization: Hawk.getAuthorizationHeader(credentials, args.method, args.url, url.host, url.port, args.nonce, args.date)
+          };
+        }
+        console.log(headers);
 
         // and pass a bag of calculated authorization headers (only one)
         // back to the client
