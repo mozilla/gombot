@@ -87,7 +87,7 @@ GombotClient.prototype = {
         password: args.pass
       }, function(err, r) {
         self.authKey = r.authKey;
-        args.data = JSON.stringify({email: args.email, pass: r.authKey});
+        args.data = JSON.stringify({email: args.email, pass: r.authKey, newsletter: args.newsletter});
         // send request with authKey as the password
         request(args, cb);
       });
