@@ -18,7 +18,7 @@ var daemonsToRun = {
 };
 
 // only run builder if specified
-//if (!process.env.BUILD_SERVER) delete daemonsToRun.builder;
+if (!process.env.ENABLE_BUILDS) delete daemonsToRun.builder;
 
 process.env['GOMBOT_HOST'] = HOST;
 

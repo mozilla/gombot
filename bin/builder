@@ -14,6 +14,10 @@ const spawn   = require('child_process').spawn;
 
 console.log("build server starting up");
 
+if (!config.build_server.enabled) {
+  console.log("builds disabled");
+}
+
 var buildScript = path.resolve(__dirname, '..', 'scripts', 'crxmake.sh');
 var downloadDir = path.join(__dirname, '..', 'downloads');
 var privSigningKeyPath = path.join(process.env['HOME'], '.ssh', 'id_rsa');
@@ -179,6 +183,8 @@ Builder.prototype._pullLatest = function(cb) {
 // may be invoked any time we suspect updates have occured to re-deploy
 // if needed
 Builder.prototype.checkForUpdates = function() {
+  if (!config.build_server.enabled) return;
+
   var self = this;
 
   if (this._busy) {
