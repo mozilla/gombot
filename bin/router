@@ -21,6 +21,16 @@ console.log("router starting up");
 // set up logging
 app.use(express.logger());
 
+var hosts = [ 'getgombot.com', 'getgombot.org', 'getgumbot.com', 'gumbot.org' ];
+app.use(function(req, res, next) {
+  if (hosts.indexOf(req.headers.host) >= 0) {
+    res.writeHead(301, {'Location': 'https://gombot.org'});
+    res.end();
+  } else {
+    next();
+  }
+});
+
 // redirect requests to the "verifier" processes
 app.use(function(req, res, next) {
   if (/^\/api/.test(req.url)) {

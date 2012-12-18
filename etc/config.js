@@ -1,6 +1,6 @@
 
 var config = module.exports = {
-  public_url: process.env.PUBLIC_URL || 'http://127.0.0.1:20000',
+  public_url: process.env.PUBLIC_URL || 'https://gombot.org',
   process: {
     router: {
       port: process.env.PORT || 20000,
