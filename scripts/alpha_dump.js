@@ -10,7 +10,7 @@ var options = {
 couchbase.connect(options, function(err, bucket) {
   bucket.get('alpha_users', function (err, doc) {
     console.log('Alpha User Emails\n-----------------');
-    console.log(doc.emails.join('\n'));
+    if (doc && doc.emails) console.log(doc.emails.join('\n'));
     process.exit();
   });
 });
