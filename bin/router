@@ -21,6 +21,7 @@ console.log("router starting up");
 // set up logging
 app.use(express.logger());
 
+// redirect alt domains
 var hosts = [ 'getgombot.com', 'getgombot.org', 'getgumbot.com', 'gumbot.org' ];
 app.use(function(req, res, next) {
   if (hosts.indexOf(req.headers.host) >= 0) {
@@ -31,7 +32,7 @@ app.use(function(req, res, next) {
   }
 });
 
-// redirect requests to the "verifier" processes
+// redirect requests to the api processes
 app.use(function(req, res, next) {
   if (/^\/api/.test(req.url)) {
     forward(api_url + req.url.replace(/^\/api/,''),
