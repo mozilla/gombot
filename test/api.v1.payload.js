@@ -6,7 +6,7 @@ Client = require('../client/client.js');
 var servers;
 var client;
 
-var test_user = 'foo@status.com';
+var test_user = 'foo@payload.com';
 var test_pass  = 'bar';
 
 describe('the servers', function() {
@@ -31,15 +31,12 @@ function createAccount(email, pass, cb) {
   });
 }
 
-describe("/api/v1/status", function() {
-  it ('should pass authorization', function(done) {
+describe("/api/v1/payload", function() {
+  it ('should store payload', function(done) {
     createAccount(test_user, test_pass, function() {
       try {
-        client.status({
-          email: test_user,
-          key: client.authKey,
-          nonce: 'oh hai',
-          date: new Date()
+        client.storePayload({
+          payload: 'foo'
         }, function(err, r) {
           should.not.exist(err);
           should.exist(r);
@@ -49,6 +46,19 @@ describe("/api/v1/status", function() {
         done(e);
       }
     });
+  });
+  it ('should get payload', function(done) {
+    try {
+      client.getPayload({}, function(err, r) {
+        should.not.exist(err);
+        should.exist(r);
+        should.exist(r.updated);
+        (r.payload).should.equal('foo');
+        done();
+      });
+    } catch (e) {
+      done(e);
+    }
   });
 });
 

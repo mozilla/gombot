@@ -21,7 +21,7 @@ describe('the servers', function() {
 describe('/api/v1/account', function() {
   it('staging should return success', function(done) {
     client.account({
-      email: 'foo',
+      email: 'foo@account.com',
       pass: 'bar',
       newsletter: false
     }, function(err, r) {
