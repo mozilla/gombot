@@ -145,6 +145,13 @@ GombotClient.prototype = {
     args.path   = this.path + '/v1/payload';
 
     authRequest(args, cb);
+  },
+  getTimestamp: function(args, cb) {
+    args        = mergeArgs(args, this);
+    args.method = 'get';
+    args.path   = this.path + '/v1/payload/timestamp';
+
+    authRequest(args, cb);
   }
 };
 
