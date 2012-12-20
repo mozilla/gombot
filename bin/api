@@ -11,6 +11,9 @@ function fatal(msg) {
   process.exit(1);
 }
 
+var options = config.hapi;
+
+// retrieve authKey of user to validate authorized requests
 function credentialsFunc(id, callback) {
   db.getAuthKey(id, function (err, key){
     if (err) return callback(err);
@@ -26,14 +29,24 @@ function credentialsFunc(id, callback) {
   });
 }
 
-var apiOptions = config.hapi;
-apiOptions.auth.getCredentialsFunc = credentialsFunc;
+options.auth.getCredentialsFunc = credentialsFunc;
+
+// modify default error format
+options.format = {
+  error: function (result) {
+    return {
+      code: result.code,
+      payload: { success: false, errorCode: result.code, errorMessage: result.message },
+      type: 'application/json'
+    };
+  }
+};
 
 // Create a server with a host and port
 var bindTo = config.process.api;
-var server = new Hapi.Server(bindTo.host, bindTo.port, apiOptions);
+var server = new Hapi.Server(bindTo.host, bindTo.port, options);
 
-// don't require authorization for docs
+// don't require authorization for docs (may change after hapi 0.9.2)
 server._routes['get'][0].config.auth = config.hapi.docs.auth;
 
 console.log("api starting up");
