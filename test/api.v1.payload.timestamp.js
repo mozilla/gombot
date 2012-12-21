@@ -15,7 +15,7 @@ describe('the servers', function() {
       should.not.exist(err);
       should.exist(r);
       servers = r;
-      client = new Client('http://' + servers.host + ':' + servers.port);
+      client = new Client('http://' + servers.host + ':' + servers.port + '/api');
       done();
     });
   });

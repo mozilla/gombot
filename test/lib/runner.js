@@ -12,7 +12,8 @@ module.exports = function(cb) {
   s.server = spawn(path.join(__dirname, '..', '..', 'bin', 'api'), [], {
     env: {
       PORT: 0,
-      PATH: process.env.PATH
+      PATH: process.env.PATH,
+      HOST_HEADER: 'Host'
     }
   });
   s.server.stdout.on('data', function (data) {

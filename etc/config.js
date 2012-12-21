@@ -27,7 +27,8 @@ var config = module.exports = {
       }
     },
     auth: {
-      scheme: 'hawk'
+      scheme: 'hawk',
+      hostHeaderName: process.env.HOST_HEADER || 'X-Forwarded-Host'
     }
   },
   build_server: {
