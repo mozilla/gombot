@@ -139,14 +139,14 @@ GombotClient.prototype = {
         password: args.pass
       }, function(err, r) {
         if (err) return cb(err);
-        args.key = r.authKey;
+        var key = args.key = r.authKey;
 
         self.status(args, function (err, r) {
           if (!err && r.success) {
-            self.authKey = r.authKey;
+            self.authKey = key;
             self.user    = args.email;
           }
-          cb(err, r);
+          if (cb) cb(err, r);
         });
       });
   },
