@@ -1,7 +1,7 @@
 
 if (typeof sjcl === 'undefined') {
   var sjcl = require('./sjcl.js');
-  var Hawk = require('hawk');
+  //var Hawk = require('hawk');
 }
 
 if (typeof URLParse === 'undefined') {
@@ -120,7 +120,7 @@ var GombotCrypto = (function() {
       args.method = args.method.toUpperCase();
 
       // how about if the key is poorly formated?
-      //var keyBits = sjcl.codec.base64.toBits(args.key);
+      var keyBits = sjcl.codec.base64.toBits(args.key);
 
       var url = URLParse(args.url);
       // add a port if default is in use
@@ -130,8 +130,7 @@ var GombotCrypto = (function() {
 
       setTimeout(function() {
         if (typeof Hawk === 'undefined') {
-          //var hmac = new sjcl.misc.hmac(keyBits);
-          var hmac = new sjcl.misc.hmac(args.key);
+          var hmac = new sjcl.misc.hmac(keyBits);
           var body =
             // string representation of seconds since epoch
             args.date.toString() + "\n" +
@@ -146,7 +145,6 @@ var GombotCrypto = (function() {
             // random nonce
             args.nonce + '\n';
 
-          console.log('body', body);
           var mac = sjcl.codec.base64.fromBits(hmac.mac(body));
           var header = 'Hawk id="' + args.email + '", ts="' + args.date + (args.nonce ? '", ext="' + args.nonce : '') + '", mac="' + mac + '"';
           var headers = {
@@ -163,7 +161,6 @@ var GombotCrypto = (function() {
             Authorization: Hawk.getAuthorizationHeader(credentials, args.method, args.url, url.host, url.port, args.nonce, args.date)
           };
         }
-        console.log(headers);
 
         // and pass a bag of calculated authorization headers (only one)
         // back to the client

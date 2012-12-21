@@ -75,7 +75,7 @@ function authRequest(args, cb) {
       nonce: args.nonce || 'unused',
       date: args.date || new Date()
     }, function(err, r) {
-      if (err) return cb(err);
+      if (err) return cb(err, r);
       args.headers = r;
       // send request with authKey as the password
       request(args, cb);
@@ -130,6 +130,25 @@ GombotClient.prototype = {
     args.path   = this.path + '/v1/status';
 
     authRequest(args, cb);
+  },
+  signIn: function(args, cb) {
+    var self = this;
+    // compute the authKey
+    GombotCrypto.derive({
+        email: args.email,
+        password: args.pass
+      }, function(err, r) {
+        if (err) return cb(err);
+        args.key = r.authKey;
+
+        self.status(args, function (err, r) {
+          if (!err && r.success) {
+            self.authKey = r.authKey;
+            self.user    = args.email;
+          }
+          cb(err, r);
+        });
+      });
   },
   storePayload: function(args, cb) {
     args        = mergeArgs(args, this);
