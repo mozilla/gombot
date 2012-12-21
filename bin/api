@@ -6,6 +6,13 @@ const apiLoader = require('../lib/api_loader.js');
 const db        = require('../lib/db.js');
 const config    = require('../etc/config');
 
+// Listen to log events
+Hapi.Log.on('log', function (event) {
+
+    // Send to console
+    Hapi.Log.print(event);
+});
+
 function fatal(msg) {
   process.stderr.write("fatal error: " + msg + "\n");
   process.exit(1);
