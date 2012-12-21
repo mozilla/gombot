@@ -42,15 +42,15 @@ function request(args, cb) {
         try {
           data = JSON.parse(data);
         } catch (e) {
-          return cb('Invalid JSON response: ' + e);
+          return cb && cb('Invalid JSON response: ' + e);
         }
       }
       data.session_context = {};
-      cb(null, data);
+      if (cb) cb(null, data);
     },
     processData: false,
     error: function(data, res, status) {
-      cb('Error: ' + data + '\nStatus: ' + status);
+      if (cb) cb('Error: ' + data + '\nStatus: ' + status);
     }
   };
   if (method == 'PUT' || method == 'POST') {
