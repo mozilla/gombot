@@ -1,6 +1,8 @@
 
 if (typeof sjcl === 'undefined') {
-  var sjcl = require('./sjcl.js');
+  var sjcl = require('./sjcl-with-cbc.js');
+  // we use an HMAC tag to check message integrity, to use CBC safely
+  sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
   //var Hawk = require('hawk');
 }
 
@@ -18,11 +20,18 @@ var GombotCrypto = (function() {
   // sha-256 hash function
   var PBKDF2_OUTPUT_LENGTH_BITS = 32 * 8;
 
-  // salt string for derivation of keyAuth
+  var MASTER_SALT_PREFIX_STRING = "identity.mozilla.com/gombot/v1/master:";
+
+  // salt string for derivation of keys.authKey (for HAWK)
   var AUTH_SALT_STRING = "identity.mozilla.com/gombot/v1/authentication";
 
-  // salt string for derivation of keyCrypt
-  var CRYPT_SALT_STRING = "identity.mozilla.com/gombot/v1/encryption";
+  // salt string for derivation of keys.aesKey
+  var AES_SALT_STRING = "identity.mozilla.com/gombot/v1/data/AES";
+
+  // and for derivation of keys.hmacKey
+  var HMAC_SALT_STRING = "identity.mozilla.com/gombot/v1/data/HMAC";
+
+  var GOMBOT_VERSION_PREFIX = "identity.mozilla.com/gombot/v1/data:";
 
   // methods supported for request signing
   var SUPPORTED_METHODS = {
@@ -48,38 +57,69 @@ var GombotCrypto = (function() {
       // yes, this async break is artificial for now, but is web worker
       // compatible in the future.
       setTimeout(function() {
-        var saltBits = sjcl.codec.utf8String.toBits(args.email);
-        var derivedKey = sjcl.misc.pbkdf2(args.password,
-                                          saltBits,
-                                          PBKDF2_ROUNDS,
-                                          PBKDF2_OUTPUT_LENGTH_BITS);
-
-        // XXX: for now we're doing another round of PBKDF2 to derive authKey and
-        // cryptKey.  We should be doing HKDF?
-        var rv = {};
-        var authSaltBits = sjcl.codec.utf8String.toBits(AUTH_SALT_STRING);
-        rv.authKey = sjcl.misc.pbkdf2(derivedKey,
-                                      authSaltBits,
-                                      1,
-                                      PBKDF2_OUTPUT_LENGTH_BITS);
-        var cryptSaltBits = sjcl.codec.utf8String.toBits(CRYPT_SALT_STRING);
-        rv.cryptKey = sjcl.misc.pbkdf2(derivedKey,
-                                      cryptSaltBits,
-                                      1,
-                                      PBKDF2_OUTPUT_LENGTH_BITS);
-
-        // always return content to the client as base64 encoded strings.
-        rv.authKey = sjcl.codec.base64.fromBits(rv.authKey);
-        rv.cryptKey = sjcl.codec.base64.fromBits(rv.cryptKey);
-
-        cb(null, rv);
+        var pbkdf2 = sjc.misc.pbkdf2;
+        var bA = sjcl.bitArray;
+        var str2bits = sjcl.codec.utf8String.toBits;
+        var secret = str2bits(""); // for the future
+        var masterSecret = bA.concat(bA.concat(secret, str2bits(":")),
+                                     str2bits(args.password));
+        var saltBits = bA.concat(str2bits(MASTER_SALT_PREFIX_STRING),
+                                 str2bits(args.email));
+        var masterKey = pbkdf2(masterSecret, saltBits,
+                               PBKDF2_ROUNDS, PBKDF2_OUTPUT_LENGTH_BITS);
+        // derive the three other keys from this master. Return them as hex.
+        var bits2hex = sjcl.codec.hex.fromBits;
+        var keys = {};
+        keys.authKey = bits2hex(pbkdf2(masterKey, str2bits(AUTH_SALT_STRING),
+                                       1, PBKDF2_OUTPUT_LENGTH_BITS));
+        keys.aesKey = bits2hex(pbkdf2(masterKey, str2bits(AES_SALT_STRING),
+                                      1, PBKDF2_OUTPUT_LENGTH_BITS));
+        keys.hmacKey = bits2hex(pbkdf2(masterKey, str2bits(HMAC_SALT_STRING),
+                                       1, PBKDF2_OUTPUT_LENGTH_BITS));
+        cb(null, keys);
       }, 0);
     },
-    encrypt: function(cryptKey, plainText, cb) {
-      setTimeout(cb, 0);
+    encrypt: function(keys, plainText, cb) {
+      setTimeout(function() {
+        var bA = sjcl.bitArray;
+        var str2bits = sjcl.codec.utf8String.toBits;
+        var bits2b64 = sjcl.codec.base64.fromBits;
+        var hex2bits = sjcl.codec.hex.toBits;
+        var IV = sjcl.random.randomWords(16/4);
+        var ct = sjcl.mode.cbc.encrypt(new sjcl.cipher.aes(hex2bits(keys.aesKey)),
+                                       str2bits(plainText), IV);
+        var msg = bA.concat(bA.concat(str2bits(GOMBOT_VERSION_PREFIX), IV), ct);
+        var mac = new sjcl.misc.hmac(hex2bits(keys.hmacKey), 
+                                     sjcl.hash.sha256).mac(msg);
+        var msgmac_b64 = bits2b64(bA.concat(msg, mac));
+        cb(null, msgmac_b64);
+      }, 0);
     },
-    decrypt: function(cryptKey, cipherText, cb) {
-      setTimeout(cb, 0);
+    decrypt: function(keys, cipherText, cb) {
+      setTimeout(function() {
+        var bA = sjcl.bitArray;
+        var str2bits = sjcl.codec.utf8String.toBits;
+        var bits2str = sjcl.codec.utf8String.fromBits;
+        var b642bits = sjcl.codec.base64.toBits;
+        var hex2bits = sjcl.codec.hex.toBits;
+        var msgmac = b642bits(cipherText);
+        var prefixBits = str2bits(GOMBOT_VERSION_PREFIX);
+        var prelen = bA.bitLength(prefixBits);
+        var gotPrefix = bA.bitSlice(msgmac, 0, prelen);
+        if (!bA.equal(gotPrefix, prefixBits))
+          return cb(new Error("unrecognized version prefix '"+bits2str(gotPrefix)+"'"));
+        var macable = bA.bitSlice(msgmac, 0, bA.bitLength(msgmac)-32*8);
+        var expectedMac = new sjcl.misc.hmac(hex2bits(keys.hmacKey),
+                                             sjcl.hash.sha256).mac(macable);
+        var gotMac = bA.bitSlice(msgmac, bA.bitLength(msgmac)-32*8);
+        if (!bA.equal(expectedMac, gotMac)) // this is constant-time
+          return cb(new Error("Corrupt encrypted data"));
+        var IV = bA.bitSlice(macable, prelen, prelen+16*8);
+        var msg = bA.bitSlice(macable, prelen+16*8);
+        var plaintext = sjcl.mode.cbc.decrypt(new sjcl.cipher.aes(hex2bits(keys.aesKey)), msg, IV);
+
+        cb(null, bits2str(plaintext));
+      }, 0);
     },
     sign: function(args, cb) {
       var SUPPORTED_METHODS = {
