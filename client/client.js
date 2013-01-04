@@ -105,7 +105,11 @@ GombotClient.prototype = {
     args.method = 'get';
     args.path   = this.path + '/v1/context';
 
-    request(args, cb);
+    request(args, function (err, data) {
+      GombotCrypto.seed(data.entropy, function() {
+        if (cb) cb(null, data);
+      });
+    });
   },
   // create an account
   account: function(args, cb) {
