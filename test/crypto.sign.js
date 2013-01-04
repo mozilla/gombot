@@ -2,20 +2,23 @@ const
 should = require('should'),
 GombotCrypto = require('../client/crypto.js');
 
+var seed = Buffer(require("crypto").randomBytes(32), "binary").toString('base64');
+GombotCrypto.seed(seed, function () {});
+
 describe('GumbotCrypto.sign', function() {
   it('should throw when required parameters are missing', function(done) {
     (function(){
       GombotCrypto.sign();
-    }).should.throw('.key is required and must be a string');
+    }).should.throw('.keys.authKey is required and must be a string');
     (function(){
-      GombotCrypto.sign({ key: "foo" });
+      GombotCrypto.sign({ keys: {authKey: "foo"} });
     }).should.throw('.email is required and must be a string');
     (function(){
-      GombotCrypto.sign({ key: "foo", email: "bar" });
+      GombotCrypto.sign({ keys: {authKey: "foo"}, email: "bar" });
     }).should.throw('.date is required and must be a javascript Date object or an integer representing seconds since epoch');
     (function(){
       GombotCrypto.sign({
-        key: "foo",
+        keys: {authKey: "foo"},
         email: "bar",
         date: new Date(),
         payload: 45 // bogus!
@@ -23,14 +26,14 @@ describe('GumbotCrypto.sign', function() {
     }).should.throw('.payload must be a string if supplied');
     (function(){
       GombotCrypto.sign({
-        key: "foo",
+        keys: {authKey: "foo"},
         email: "bar",
         date: new Date(),
         payload: 'x' });
     }).should.throw('.url is required and must be a string');
     (function(){
       GombotCrypto.sign({
-        key: "foo",
+        keys: {authKey: "foo"},
         email: "bar",
         date: new Date(),
         payload: 'x',
@@ -39,7 +42,7 @@ describe('GumbotCrypto.sign', function() {
     }).should.throw('.method must be an allowable HTTP method');
     (function(){
       GombotCrypto.sign({
-        key: "foo",
+        keys: {authKey: "foo"},
         email: "bar",
         date: new Date(),
         payload: 'x',
@@ -49,7 +52,7 @@ describe('GumbotCrypto.sign', function() {
     }).should.throw('.nonce should be a random string');
     (function(){
       GombotCrypto.sign({
-        key: "foo",
+        keys: {authKey: "foo"},
         email: "bar",
         date: new Date(),
         payload: 'x',
@@ -66,7 +69,7 @@ describe('GumbotCrypto.sign', function() {
     GombotCrypto.derive({ email: 'foo', password: 'bar' }, function(err, rez) {
       should.not.exist(err);
       GombotCrypto.sign({
-        key: rez.cryptKey,
+        keys: {authKey: rez.authKey },
         email: "bar",
         date: new Date(1352177818454),
         payload: 'x',
@@ -77,7 +80,7 @@ describe('GumbotCrypto.sign', function() {
         should.not.exist(err);
         should.exist(rez);
         (rez.Authorization).should.be.a('string');
-        (rez.Authorization).should.equal('Hawk id="bar", ts="1352177818", ext="one time only please", mac="PUiIAcoruPIarsFALtc/1lTThcYVDmzZHtvuluHHvmQ="');
+        (rez.Authorization).should.equal('Hawk id="bar", ts="1352177818", ext="one time only please", mac="6b+dMvKSWdAD0hFHR/Ik3MzkIS6mPdzRc31DGNM8dbI="');
         done();
       });
     });

@@ -27,7 +27,7 @@ function createAccount(email, pass, cb) {
     pass: pass
   }, function(err, r) {
     if (err) cb(err);
-    cb(null, client.key);
+    cb(null);
   });
 }
 
@@ -50,6 +50,7 @@ describe("/api/v1/payload", function() {
   it ('should get payload', function(done) {
     try {
       client.getPayload({}, function(err, r) {
+        console.error('??????', r);
         should.not.exist(err);
         should.exist(r);
         should.exist(r.updated);

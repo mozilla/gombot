@@ -1,8 +1,6 @@
 
 if (typeof sjcl === 'undefined') {
   var sjcl = require('./sjcl-with-cbc.js');
-  // we use an HMAC tag to check message integrity, to use CBC safely
-  sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
   //var Hawk = require('hawk');
 }
 
@@ -11,6 +9,9 @@ if (typeof URLParse === 'undefined') {
 }
 
 var GombotCrypto = (function() {
+  // we use an HMAC tag to check message integrity, to use CBC safely
+  sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
+
   // the number of rounds used in PBKDF2 to generate a stretched derived
   // key from a user password.
   var PBKDF2_ROUNDS = 250000;
@@ -42,7 +43,14 @@ var GombotCrypto = (function() {
   };
 
   return {
+    hexToBase64: function (hex) {
+      return sjcl.codec.base64.fromBits(sjcl.codec.hex.toBits(hex));
+    },
     seed: function(entropy, cb) {
+      if (typeof window !== 'undefined') sjcl.random.startCollectors();
+      sjcl.random.addEntropy(entropy, entropy.length * 6, 'server');
+      if (!sjcl.random.isReady())
+        return cb(new Error("sjcl seeded with insufficient entropy"));
       setTimeout(cb, 0);
     },
     derive: function(args, cb) {
@@ -57,7 +65,7 @@ var GombotCrypto = (function() {
       // yes, this async break is artificial for now, but is web worker
       // compatible in the future.
       setTimeout(function() {
-        var pbkdf2 = sjc.misc.pbkdf2;
+        var pbkdf2 = sjcl.misc.pbkdf2;
         var bA = sjcl.bitArray;
         var str2bits = sjcl.codec.utf8String.toBits;
         var secret = str2bits(""); // for the future
@@ -85,6 +93,8 @@ var GombotCrypto = (function() {
         var str2bits = sjcl.codec.utf8String.toBits;
         var bits2b64 = sjcl.codec.base64.fromBits;
         var hex2bits = sjcl.codec.hex.toBits;
+        if (!sjcl.random.isReady())
+          return cb(new Error("sjcl.random is not ready, cannot create IV"));
         var IV = sjcl.random.randomWords(16/4);
         var ct = sjcl.mode.cbc.encrypt(new sjcl.cipher.aes(hex2bits(keys.aesKey)),
                                        str2bits(plainText), IV);
@@ -138,8 +148,8 @@ var GombotCrypto = (function() {
       // payload may be omitted (as for GET requests)
       if (!args.payload) args.payload = '';
 
-      if (typeof args.key !== 'string')
-        throw new Error(".key is required and must be a string");
+      if (!args.keys || typeof args.keys.authKey !== 'string')
+        throw new Error(".keys.authKey is required and must be a string");
       if (typeof args.email !== 'string')
         throw new Error(".email is required and must be a string");
       if (typeof args.date !== 'number')
@@ -160,7 +170,7 @@ var GombotCrypto = (function() {
       args.method = args.method.toUpperCase();
 
       // how about if the key is poorly formated?
-      var keyBits = sjcl.codec.base64.toBits(args.key);
+      var keyBits = sjcl.codec.hex.toBits(args.keys.authKey);
 
       var url = URLParse(args.url);
       // add a port if default is in use
@@ -193,7 +203,7 @@ var GombotCrypto = (function() {
         } else {
           var credentials = {
             id: args.email,
-            key: new Buffer(args.key, 'base64'),
+            key: new Buffer(args.keys.authKey, 'hex'),
             algorithm: 'hmac-sha-256'
           };
 

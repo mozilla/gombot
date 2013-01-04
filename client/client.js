@@ -16,8 +16,8 @@ GombotClient = function(path, options) {
   this.port   = url.port;
   this.path   = url.path || '';
 
-  this.user    = options.user;
-  this.authKey = options.authKey;
+  this.user = options.user;
+  this.keys = options.keys;
 };
 
 var xhr = typeof jQuery !== 'undefined' ? jQuery.ajax : require('xhrequest');
@@ -51,6 +51,9 @@ function request(args, cb) {
     processData: false,
     error: function(data, res, status) {
       if (cb) cb('Error: ' + data + '\nStatus: ' + status);
+    },
+    complete: function () {
+      console.log('request complete');
     }
   };
   if (method == 'PUT' || method == 'POST') {
@@ -67,7 +70,7 @@ function authRequest(args, cb) {
   // compute the authKey
   GombotCrypto.sign({
       email: args.email,
-      key: args.key,
+      keys: args.keys,
       url: url,
       host: args.host,
       port: args.port,
@@ -86,7 +89,7 @@ function mergeArgs(args, def) {
   args.scheme = def.scheme;
   args.host   = args.host || def.host;
   args.port   = args.port || def.port;
-  args.key    = args.key || def.authKey;
+  args.keys   = args.keys || def.keys;
   args.email  = args.email || def.user;
   return args;
 }
@@ -104,6 +107,7 @@ GombotClient.prototype = {
 
     request(args, cb);
   },
+  // create an account
   account: function(args, cb) {
     var self = this;
 
@@ -116,14 +120,15 @@ GombotClient.prototype = {
         email: args.email,
         password: args.pass
       }, function(err, r) {
-        self.authKey = r.authKey;
-        self.user    = args.email;
+        self.keys = r;
+        self.user = args.email;
 
-        args.data = JSON.stringify({email: args.email, pass: r.authKey, newsletter: args.newsletter});
+        args.data = JSON.stringify({email: args.email, pass: GombotCrypto.hexToBase64(r.authKey), newsletter: args.newsletter});
         // send request with authKey as the password
         request(args, cb);
       });
   },
+  // check auth status
   status: function(args, cb) {
     args        = mergeArgs(args, this);
     args.method = 'get';
@@ -131,6 +136,8 @@ GombotClient.prototype = {
 
     authRequest(args, cb);
   },
+  // derives auth key using credentials then checks
+  // auth status using derived keys
   signIn: function(args, cb) {
     var self = this;
     // compute the authKey
@@ -139,12 +146,12 @@ GombotClient.prototype = {
         password: args.pass
       }, function(err, r) {
         if (err) return cb(err);
-        var key = args.key = r.authKey;
+        var keys = args.keys = r;
 
         self.status(args, function (err, r) {
           if (!err && r.success) {
-            self.authKey = key;
-            self.user    = args.email;
+            self.keys = keys;
+            self.user = args.email;
           }
           if (cb) cb(err, r);
         });
@@ -154,16 +161,25 @@ GombotClient.prototype = {
     args        = mergeArgs(args, this);
     args.method = 'put';
     args.path   = this.path + '/v1/payload';
-    args.data   = JSON.stringify({payload: args.payload});
-
-    authRequest(args, cb);
+    GombotCrypto.encrypt(this.keys, JSON.stringify(args.payload), function (err, cipherText) {
+      if (err) return cb(err);
+      args.data = JSON.stringify({payload: cipherText});
+      authRequest(args, cb);
+    });
   },
   getPayload: function(args, cb) {
     args        = mergeArgs(args, this);
     args.method = 'get';
     args.path   = this.path + '/v1/payload';
 
-    authRequest(args, cb);
+    var keys = this.keys;
+    authRequest(args, function (err, data) {
+      if (err) return cb(err);
+      GombotCrypto.decrypt(keys, data.payload, function (err, plaintext) {
+        if (err) return cb(err);
+        cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated});
+      });
+    });
   },
   getTimestamp: function(args, cb) {
     args        = mergeArgs(args, this);
