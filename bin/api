@@ -41,6 +41,7 @@ options.auth.getCredentialsFunc = credentialsFunc;
 // modify default error format
 options.format = {
   error: function (result) {
+    Hapi.Log.event(['error'], result.message);
     return {
       code: result.code,
       payload: { success: false, errorCode: result.code, errorMessage: result.message },
