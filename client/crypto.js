@@ -9,6 +9,34 @@ if (typeof URLParse === 'undefined') {
 }
 
 var GombotCrypto = (function() {
+
+  // create a worker to perform crypto computations
+  var worker;
+  if (typeof Worker !== 'undefined') {
+    worker = new Worker('../../server/client/worker.js');
+    worker.onmessage = function(event) {
+      var data = event.data;
+      if (typeof data.id !== 'undefined') {
+        console.log('event', event);
+        if (data.err) cmds[data.id](data.err);
+        else cmds[data.id](null, data.result);
+        delete cmds[data.id];
+      } else console.log(data);
+    };
+    worker.onerror = function(event) {
+      console.log(event);
+    };
+  }
+
+  var cmdIds = 0;
+  var cmds = {};
+  function doWork (cmd, args, cb) {
+    var id = cmdIds;
+    cmds[cmdIds++] = cb || function() {};
+    console.log('dowork', { cmd: cmd, args: args, id: id });
+    worker.postMessage({ cmd: cmd, args: args, id: id });
+  }
+
   // we use an HMAC tag to check message integrity, to use CBC safely
   sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
 
@@ -47,6 +75,8 @@ var GombotCrypto = (function() {
       return sjcl.codec.base64.fromBits(sjcl.codec.hex.toBits(hex));
     },
     seed: function(entropy, cb) {
+      if (worker) return doWork('seed', entropy, cb);
+
       if (typeof window !== 'undefined') sjcl.random.startCollectors();
       sjcl.random.addEntropy(entropy, entropy.length * 6, 'server');
       if (!sjcl.random.isReady())
@@ -54,6 +84,8 @@ var GombotCrypto = (function() {
       setTimeout(cb, 0);
     },
     derive: function(args, cb) {
+      if (worker) return doWork('derive', args, cb);
+
       args = args || {};
 
       if (typeof args.email !== 'string' || typeof args.password !== 'string')
@@ -88,6 +120,8 @@ var GombotCrypto = (function() {
       }, 0);
     },
     encrypt: function(keys, plainText, cb) {
+      if (worker) return doWork('encrypt', { keys: keys, payload: plainText }, cb);
+
       setTimeout(function() {
         var bA = sjcl.bitArray;
         var str2bits = sjcl.codec.utf8String.toBits;
@@ -106,6 +140,8 @@ var GombotCrypto = (function() {
       }, 0);
     },
     decrypt: function(keys, cipherText, cb) {
+      if (worker) return doWork('decrypt', { keys: keys, payload: cipherText }, cb);
+
       setTimeout(function() {
         var bA = sjcl.bitArray;
         var str2bits = sjcl.codec.utf8String.toBits;
@@ -218,6 +254,7 @@ var GombotCrypto = (function() {
       }, 0);
     }
   };
+
 })();
 
 if(typeof module != 'undefined' && module.exports){

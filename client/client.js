@@ -106,6 +106,7 @@ GombotClient.prototype = {
     args.path   = this.path + '/v1/context';
 
     request(args, function (err, data) {
+      if (err && cb) return cb(err);
       GombotCrypto.seed(data.entropy, function() {
         if (cb) cb(null, data);
       });
