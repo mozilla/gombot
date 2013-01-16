@@ -162,14 +162,28 @@ GombotClient.prototype = {
         });
       });
   },
-  storePayload: function(args, cb) {
+  
+  storeEncryptedPayload: function(args,cb) {
     args        = mergeArgs(args, this);
     args.method = 'put';
     args.path   = this.path + '/v1/payload';
-    GombotCrypto.encrypt(this.keys, JSON.stringify(args.payload), function (err, cipherText) {
+    args.data = JSON.stringify({payload: args.cipherText});
+    authRequest(args, cb);
+  },
+  
+  createEncryptedPayload: function(payload, cb) {
+    GombotCrypto.encrypt(this.keys, JSON.stringify(payload), function (err, cipherText) {
       if (err) return cb(err);
-      args.data = JSON.stringify({payload: cipherText});
-      authRequest(args, cb);
+      cb(null, cipherText);
+    });
+  },
+  storePayload: function(args, cb) {
+    args        = mergeArgs(args, this);
+    var that = this;
+    this.createEncryptedPayload(args.payload, function(err, cipherText) {
+      if (err) return cb(err);
+      args.cipherText = cipherText;
+      that.storeEncryptedPayload(args,cb);
     });
   },
   getPayload: function(args, cb) {
