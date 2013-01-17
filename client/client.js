@@ -209,6 +209,9 @@ GombotClient.prototype = {
     args.path   = this.path + '/v1/payload/timestamp';
 
     authRequest(args, cb);
+  },
+  isAuthenticated: function() {
+    return this.user && this.keys === Object(this.keys);
   }
 };
 
