@@ -181,11 +181,17 @@ GombotClient.prototype = {
   // update
   storePayload: function(args, cb) {
     args        = mergeArgs(args, this);
-    var that = this;
+    var self = this;
     this.createEncryptedPayload(args.payload, function(err, ciphertext) {
       if (err) return cb(err);
       args.ciphertext = ciphertext;
-      that.storeEncryptedPayload(args,cb);
+      self.storeEncryptedPayload(args,cb);
+    });
+  },
+  decryptPayload: function(encryptedPayload, cb) {
+    GombotCrypto.decrypt(this.keys, encryptedPayload, function (err, plaintext) {
+      if (err) return cb(err);
+      cb(null, plaintext);
     });
   },
   // read
@@ -195,9 +201,10 @@ GombotClient.prototype = {
     args.path   = this.path + '/v1/payload';
 
     var keys = this.keys;
+    var self = this;
     authRequest(args, function (err, data) {
       if (err) return cb(err);
-      GombotCrypto.decrypt(keys, data.payload, function (err, plaintext) {
+      self.decryptPayload(data.payload, function (err, plaintext) {
         if (err) return cb(err);
         cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated, ciphertext: data.payload });
       });
