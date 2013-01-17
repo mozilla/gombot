@@ -53,7 +53,7 @@ function request(args, cb) {
       if (cb) cb({ error: data, status: status });
     },
     complete: function () {
-      console.log('request complete');
+      //console.log('request complete');
     }
   };
   if (method == 'PUT' || method == 'POST') {

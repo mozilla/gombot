@@ -17,7 +17,7 @@ var GombotCrypto = (function() {
     worker.onmessage = function(event) {
       var data = event.data;
       if (typeof data.id !== 'undefined') {
-        console.log('event', event);
+        //console.log('event', event);
         if (data.err) cmds[data.id](data.err);
         else cmds[data.id](null, data.result);
         delete cmds[data.id];
@@ -33,7 +33,7 @@ var GombotCrypto = (function() {
   function doWork (cmd, args, cb) {
     var id = cmdIds;
     cmds[cmdIds++] = cb || function() {};
-    console.log('dowork', { cmd: cmd, args: args, id: id });
+    //console.log('dowork', { cmd: cmd, args: args, id: id });
     worker.postMessage({ cmd: cmd, args: args, id: id });
   }
 
@@ -133,7 +133,7 @@ var GombotCrypto = (function() {
         var ct = sjcl.mode.cbc.encrypt(new sjcl.cipher.aes(hex2bits(keys.aesKey)),
                                        str2bits(plainText), IV);
         var msg = bA.concat(bA.concat(str2bits(GOMBOT_VERSION_PREFIX), IV), ct);
-        var mac = new sjcl.misc.hmac(hex2bits(keys.hmacKey), 
+        var mac = new sjcl.misc.hmac(hex2bits(keys.hmacKey),
                                      sjcl.hash.sha256).mac(msg);
         var msgmac_b64 = bits2b64(bA.concat(msg, mac));
         cb(null, msgmac_b64);
