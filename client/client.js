@@ -50,7 +50,7 @@ function request(args, cb) {
     },
     processData: false,
     error: function(data, res, status) {
-      if (cb) cb('Error: ' + data + '\nStatus: ' + status);
+      if (cb) cb({ error: data, status: status });
     },
     complete: function () {
       console.log('request complete');
@@ -162,30 +162,33 @@ GombotClient.prototype = {
         });
       });
   },
-  
+
+  // update
   storeEncryptedPayload: function(args,cb) {
     args        = mergeArgs(args, this);
     args.method = 'put';
     args.path   = this.path + '/v1/payload';
-    args.data = JSON.stringify({payload: args.cipherText});
+    args.data = JSON.stringify({payload: args.ciphertext});
     authRequest(args, cb);
   },
-  
+
   createEncryptedPayload: function(payload, cb) {
-    GombotCrypto.encrypt(this.keys, JSON.stringify(payload), function (err, cipherText) {
+    GombotCrypto.encrypt(this.keys, JSON.stringify(payload), function (err, ciphertext) {
       if (err) return cb(err);
-      cb(null, cipherText);
+      cb(null, ciphertext);
     });
   },
+  // update
   storePayload: function(args, cb) {
     args        = mergeArgs(args, this);
     var that = this;
-    this.createEncryptedPayload(args.payload, function(err, cipherText) {
+    this.createEncryptedPayload(args.payload, function(err, ciphertext) {
       if (err) return cb(err);
-      args.cipherText = cipherText;
+      args.ciphertext = ciphertext;
       that.storeEncryptedPayload(args,cb);
     });
   },
+  // read
   getPayload: function(args, cb) {
     args        = mergeArgs(args, this);
     args.method = 'get';
@@ -196,7 +199,7 @@ GombotClient.prototype = {
       if (err) return cb(err);
       GombotCrypto.decrypt(keys, data.payload, function (err, plaintext) {
         if (err) return cb(err);
-        cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated});
+        cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated, ciphertext: data.payload });
       });
     });
   },
