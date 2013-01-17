@@ -214,12 +214,20 @@ var GombotCrypto = (function() {
         url.port = (url.scheme === 'https' ? '443' : '80');
       }
 
+      var hash = null;
+      if (args.payload) {
+        var bitArray = sjcl.hash.sha256.hash(args.payload);
+        hash = sjcl.codec.hex.fromBits(bitArray);
+      }
+
       setTimeout(function() {
         if (typeof Hawk === 'undefined') {
           var hmac = new sjcl.misc.hmac(keyBits);
-          var body =
+          var body = 'hawk.1.header\n' +
             // string representation of seconds since epoch
             args.date.toString() + "\n" +
+            // random nonce
+            args.nonce + '\n' +
             // normalized method
             args.method + '\n' +
             // path
@@ -228,11 +236,18 @@ var GombotCrypto = (function() {
             url.host + '\n' +
             // port
             url.port + '\n' +
-            // random nonce
-            args.nonce + '\n';
+            // hash of body
+            (hash || '') + '\n' +
+            // extra app data
+            (args.ext || '') + '\n';
 
           var mac = sjcl.codec.base64.fromBits(hmac.mac(body));
-          var header = 'Hawk id="' + args.email + '", ts="' + args.date + (args.nonce ? '", ext="' + args.nonce : '') + '", mac="' + mac + '"';
+          var header = 'Hawk id="' + args.email +
+                      '", ts="' + args.date +
+                      '", nonce="' + args.nonce +
+                      (hash ? '", hash="' + hash : '') +
+                      (args.ext ? '", ext="' + args.ext : '') +
+                      '", mac="' + mac + '"';
           var headers = {
             Authorization: header
           };
@@ -240,7 +255,7 @@ var GombotCrypto = (function() {
           var credentials = {
             id: args.email,
             key: new Buffer(args.keys.authKey, 'hex'),
-            algorithm: 'hmac-sha-256'
+            algorithm: 'sha256'
           };
 
           var headers = {

@@ -16,12 +16,15 @@ describe('the servers', function() {
       should.exist(r);
       servers = r;
       client = new Client('http://' + servers.host + ':' + servers.port + '/api');
-      done();
+      client.context({}, function (err) {
+        done();
+      });
     });
   });
 });
 
 function createAccount(email, pass, cb) {
+  console.error('creating account');
   client.account({
     email: email,
     pass: pass
@@ -33,24 +36,25 @@ function createAccount(email, pass, cb) {
 
 describe("/api/v1/payload", function() {
   it ('should store payload', function(done) {
-    createAccount(test_user, test_pass, function() {
+    createAccount(test_user, test_pass, function(err) {
       try {
         client.storePayload({
           payload: 'foo'
         }, function(err, r) {
           should.not.exist(err);
           should.exist(r);
-          done();
+          should.exist(r.updated);
+          return done();
         });
       } catch (e) {
-        done(e);
+        return done(e);
       }
+      //done(err);
     });
   });
   it ('should get payload', function(done) {
     try {
       client.getPayload({}, function(err, r) {
-        console.error('??????', r);
         should.not.exist(err);
         should.exist(r);
         should.exist(r.updated);
