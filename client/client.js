@@ -95,6 +95,10 @@ function mergeArgs(args, def) {
 }
 
 GombotClient.prototype = {
+  toJSON: function() {
+    return { user: this.user, keys: this.keys };
+  },
+
   // get "session context" from the server
   context: function(args, cb) {
     if (typeof args === 'function') {
