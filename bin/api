@@ -55,7 +55,7 @@ var bindTo = config.process.api;
 var server = new Hapi.Server(bindTo.host, bindTo.port, options);
 
 if (config.hapi.docs) {
-  server.addRoute({ method: 'GET', path: '/docs', handler: { docs: true }, auth: { mode: 'none' } });
+  server.addRoute({ method: 'GET', path: '/api/docs', handler: { docs: true }, config: { auth: { mode: 'none' } } });
 }
 
 
