@@ -50,6 +50,13 @@ function request(args, cb) {
     },
     processData: false,
     error: function(data, res, status) {
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          return cb && cb('Invalid JSON response: ' + e);
+        }
+      }
       if (cb) cb({ error: data, status: status });
     },
     complete: function () {
