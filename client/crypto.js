@@ -231,7 +231,7 @@ var GombotCrypto = (function() {
             // normalized method
             args.method + '\n' +
             // path
-            url.path + '\n' +
+            url.path + (url.query ? '?' + url.query : '') + '\n' +
             // hostname
             url.host + '\n' +
             // port

@@ -192,15 +192,21 @@ GombotClient.prototype = {
   getPayload: function(args, cb) {
     args        = mergeArgs(args, this);
     args.method = 'get';
-    args.path   = this.path + '/v1/payload';
+    args.path   = this.path + '/v1/payload' + '?updated=' + (args.updated || 0);
 
     var keys = this.keys;
     authRequest(args, function (err, data) {
       if (err) return cb(err);
-      GombotCrypto.decrypt(keys, data.payload, function (err, plaintext) {
-        if (err) return cb(err);
-        cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated, ciphertext: data.payload });
-      });
+      if (data.sync) {
+        GombotCrypto.decrypt(keys, data.payload, function (err, plaintext) {
+          if (err) return cb(err);
+          cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated, ciphertext: data.payload });
+        });
+      } else {
+        // both will be null
+        data.ciphertext = data.payload;
+        cb(null, data);
+      }
     });
   },
   getTimestamp: function(args, cb) {
