@@ -10,6 +10,17 @@ if (typeof URLParse === 'undefined') {
 
 var GombotCrypto = (function() {
 
+  var setTimeout;
+  // determine if setTimeout is in global scope, and if not import then
+  // import from timers module
+  if (typeof window !== 'undefined' && typeof window.setTimeout === "function") {
+    setTimeout = window.setTimeout;
+  } else if (typeof self !== "undefined" && typeof self.setTimeout === "function") {
+    setTimeout = self.setTimeout; // for Web Workers
+  } else {
+    setTimeout = require('timers').setTimeout;
+  }
+
   // create a worker to perform crypto computations
   var worker;
   if (typeof Worker !== 'undefined') {
