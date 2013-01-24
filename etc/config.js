@@ -21,11 +21,7 @@ var config = module.exports = {
   },
   hapi: {
     name: "Gombot API Server",
-    docs: {
-      auth: {
-        mode: 'none'
-      }
-    },
+    docs: true,
     auth: {
       scheme: 'hawk',
       hostHeaderName: process.env.HOST_HEADER || 'X-Forwarded-Host'

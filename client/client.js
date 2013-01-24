@@ -50,6 +50,13 @@ function request(args, cb) {
     },
     processData: false,
     error: function(data, res, status) {
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          return cb && cb('Invalid JSON response: ' + e);
+        }
+      }
       if (cb) cb({ error: data, status: status });
     },
     complete: function () {
@@ -132,9 +139,11 @@ GombotClient.prototype = {
         self.keys = r;
         self.user = args.email;
 
-        args.data = JSON.stringify({email: args.email, pass: GombotCrypto.hexToBase64(r.authKey), newsletter: args.newsletter});
-        // send request with authKey as the password
-        request(args, cb);
+        self.createEncryptedPayload(args.payload, function (err, ciphertext) {
+          args.data = JSON.stringify({email: args.email, pass: GombotCrypto.hexToBase64(r.authKey), payload: ciphertext, newsletter: args.newsletter});
+          // send request with authKey as the password
+          request(args, cb);
+        });
       });
   },
   // check auth status
@@ -202,16 +211,22 @@ GombotClient.prototype = {
   getPayload: function(args, cb) {
     args        = mergeArgs(args, this);
     args.method = 'get';
-    args.path   = this.path + '/v1/payload';
+    args.path   = this.path + '/v1/payload' + '?updated=' + (args.updated || 0);
 
     var keys = this.keys;
     var self = this;
     authRequest(args, function (err, data) {
       if (err) return cb(err);
-      self.decryptPayload(data.payload, function (err, plaintext) {
-        if (err) return cb(err);
-        cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated, ciphertext: data.payload });
-      });
+      if (data.sync) {
+        GombotCrypto.decrypt(keys, data.payload, function (err, plaintext) {
+          if (err) return cb(err);
+          cb(null, {success: data.success, payload: JSON.parse(plaintext), updated: data.updated, ciphertext: data.payload });
+        });
+      } else {
+        // both will be null
+        data.ciphertext = data.payload;
+        cb(null, data);
+      }
     });
   },
   getTimestamp: function(args, cb) {

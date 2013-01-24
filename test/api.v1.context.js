@@ -26,6 +26,7 @@ describe("/api/v1/context", function() {
       should.exist(r.session_context);
       (r.server_time).should.be.a('number');
       (r.entropy).should.be.a('string');
+      (r.success).should.be.a('boolean');
       done();
     });
   });

@@ -28,7 +28,7 @@ function credentialsFunc(id, callback) {
     var credentials = {
         id: id,
         key: new Buffer(key, 'base64'),
-        algorithm: 'hmac-sha-256',
+        algorithm: 'sha256',
         user: id
     };
 
@@ -41,7 +41,7 @@ options.auth.getCredentialsFunc = credentialsFunc;
 // modify default error format
 options.format = {
   error: function (result) {
-    Hapi.Log.event(['error'], result.message);
+    console.error('Error: ', result);
     return {
       code: result.code,
       payload: { success: false, errorCode: result.code, errorMessage: result.message },
@@ -54,8 +54,10 @@ options.format = {
 var bindTo = config.process.api;
 var server = new Hapi.Server(bindTo.host, bindTo.port, options);
 
-// don't require authorization for docs (may change after hapi 0.9.2)
-server._routes['get'][0].config.auth = config.hapi.docs.auth;
+if (config.hapi.docs) {
+  server.addRoute({ method: 'GET', path: '/api/docs', handler: { docs: true }, config: { auth: { mode: 'none' } } });
+}
+
 
 console.log("api starting up");
 

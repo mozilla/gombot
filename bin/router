@@ -35,7 +35,7 @@ app.use(function(req, res, next) {
 // redirect requests to the api processes
 app.use(function(req, res, next) {
   if (/^\/api/.test(req.url)) {
-    forward(api_url + (req.url === '/api/docs' ? '/docs' : req.url),
+    forward(api_url + req.url,
       req, res,
       function(err) {
         if (err) {
