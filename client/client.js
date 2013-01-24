@@ -135,9 +135,11 @@ GombotClient.prototype = {
         self.keys = r;
         self.user = args.email;
 
-        args.data = JSON.stringify({email: args.email, pass: GombotCrypto.hexToBase64(r.authKey), newsletter: args.newsletter});
-        // send request with authKey as the password
-        request(args, cb);
+        self.createEncryptedPayload(args.payload, function (err, ciphertext) {
+          args.data = JSON.stringify({email: args.email, pass: GombotCrypto.hexToBase64(r.authKey), payload: ciphertext, newsletter: args.newsletter});
+          // send request with authKey as the password
+          request(args, cb);
+        });
       });
   },
   // check auth status
