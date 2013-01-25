@@ -20,6 +20,19 @@ GombotClient = function(path, options) {
   this.keys = options.keys;
 };
 
+function derive(args, cb) {
+  if (typeof require !== "undefined") {
+    var kdf = require("gombot-crypto-jetpack");
+    kdf.kdf(args.email, args.password).then(function(keys) {
+      cb(null, keys);d
+    });
+  }
+  else {
+    GombotCrypto.derive(args, cb);
+  }
+}
+
+
 var xhr = typeof jQuery !== 'undefined' ? jQuery.ajax : require('xhrequest');
 
 function request(args, cb) {
@@ -132,7 +145,7 @@ GombotClient.prototype = {
     args.path   = this.path + '/v1/account';
 
     // compute the authKey
-    var headers = GombotCrypto.derive({
+    var headers = derive({
         email: args.email,
         password: args.pass
       }, function(err, r) {
@@ -159,7 +172,7 @@ GombotClient.prototype = {
   signIn: function(args, cb) {
     var self = this;
     // compute the authKey
-    GombotCrypto.derive({
+    derive({
         email: args.email,
         password: args.pass
       }, function(err, r) {
